@@ -1,4 +1,4 @@
-# 🚁 Autonomous Logistics — Drone Delivery Simulation
+# 🛍️ Retail Radar
 
 A data science project that processes a real world e-commerce transactional dataset
 to segment and analyze online retail customer behavior: purchasing recency, transaction 
