@@ -1,6 +1,5 @@
 import pandas as pd
 import geopandas as gpd
-import matplotlib.pyplot as plt
 
 class Calculator:
     def __init__(self):
@@ -14,10 +13,6 @@ class Calculator:
         
     def dis(self):
         return self.district
-    def chart(self):
-        year_data = self.df.groupby('Year')['Total_Price_LKR'].sum().reset_index()
-        year_data['Total_Price_LKR'] = year_data['Total_Price_LKR'] / 1000000
-        year_data.plot(x='Year', y='Total_Price_LKR', kind='bar', title='Earnings in Million LKR by Year', xlabel='Year', ylabel='Total Price in Million LKR', legend=None, color='green', figsize=(8, 6))
-
+    
     def dataframe(self):
         return self.df
