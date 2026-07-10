@@ -15,18 +15,20 @@ def get_yfinance_exchange_rate(base_currency, target_currency):
     
     return current_rate
 
-live_rate = get_yfinance_exchange_rate("USD", "LKR")
-print(f"Current USD to LKR rate: Rs. {live_rate:.2f}")
+live_rate = get_yfinance_exchange_rate("GBP", "LKR")
+print(f"Current GBP to LKR rate: Rs. {live_rate:.2f}")
 
 print("Loading the Online Retail dataset...")
 
 
 # --- 1. LOAD DATA AND CLEAN ---
 
+csv_file = input("Enter the name of the csv file stored in the data directory: ")
+
 try:
-    df = pd.read_csv('online_retail.csv', encoding='ISO-8859-1')
+    df = pd.read_csv(f'data/input/{csv_file}', encoding='ISO-8859-1')
 except FileNotFoundError:
-    print("Error: 'online_retail.csv' not found. Please ensure it is in the same directory.")
+    print("Error: File not found. Please ensure it is in the 'data' directory and the name is correct.")
     exit()
 
 print("Cleaning data...")
@@ -108,8 +110,8 @@ customer_district_map = dict(zip(unique_customers, assigned_districts))
 df['District'] = df['CustomerID'].map(customer_district_map)
 
 # --- 5. EXPORT ---
-output_filename = 'online_retail_lk.csv'
-print(f"Saving localized dataset to '{output_filename}'...")
-df.to_csv(output_filename, index=False)
+output_file = f'data/output/{csv_file[:-4]}_lk.csv'
+print(f"Saving localized dataset to '{output_file}'...")
+df.to_csv(output_file, index=False)
 
 print("Pipeline complete! Your dataset is fully Sri Lankanized and ready for K-Means clustering.")
