@@ -1,6 +1,6 @@
 import pandas as pd
 
-df = pd.read_csv("D:\IBM-Datascientist\Python\RetailRadar\data\output\srilanka_retail_2020_2026.csv")
+df = pd.read_csv("../data/output/srilanka_retail_2020_2026.csv")
 
 year_data = df.groupby('InvoiceDate')['Total_Price_LKR'].sum().reset_index()
 year_data['InvoiceDate'] =  year_data['InvoiceDate'][0][:4]
