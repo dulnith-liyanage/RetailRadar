@@ -141,7 +141,6 @@ with col3:
 
     weekly_sales = weekly_sales.sort_values('Day')
 
-    weekly_sales["Day"] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
     st.line_chart(weekly_sales, x="Day", y="Total_Price_LKR", y_label="Total Revenue in Million LKR"
                   ,color="#8aadf4")
