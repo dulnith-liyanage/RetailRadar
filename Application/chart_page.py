@@ -3,9 +3,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.express as px
 
-st.set_page_config(page_title="Plotting Demo", page_icon="📈")
+st.set_page_config(page_title="Sales Performance Analysis", page_icon="📈")
 
-st.markdown("# Plotting Demo")
+st.markdown("# Sales Performance Analysis")
 
 if "dataset" in st.session_state:
     df = st.session_state['dataset']
