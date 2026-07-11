@@ -1,10 +1,6 @@
-import folium
 import streamlit as st
-import folium
-from streamlit_folium import st_folium
 import pandas as pd
 import geopandas as gpd
-import seaborn as sns
 import matplotlib.pylab as plt
 
 if "dataset" in st.session_state:
