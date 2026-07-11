@@ -1,3 +1,5 @@
 .vscode
 .DS_Store
 Application/__pycache__
+venv
+Application/streamlitTests.py
