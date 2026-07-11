@@ -58,8 +58,6 @@ district = district.iloc[1:]
 
 district["Total_Price_LKR"] = district["Total_Price_LKR"]/1000000  # Convert to millions
 
-district = district[district['Total_Price_LKR'] > 0] # Remove rows with zero Total_Price_LKR values
-
 st.markdown("# Districtwise Distribution")
 
 col1, col2 = st.columns(2, gap='large')
@@ -67,12 +65,10 @@ col1, col2 = st.columns(2, gap='large')
 with col1:
     # Create a choropleth map using Matplotlib
     fig, ax = plt.subplots(figsize=(5, 5))
-    district.plot(column='Total_Price_LKR', cmap=catppuccin_red_cmap, linewidth=0.05, ax=ax, edgecolor='black', legend=False)
+    district.plot(column='Total_Price_LKR', cmap=catppuccin_red_cmap, ax=ax, legend=False,
+                   missing_kwds={"color": "white", "label": "No data"})
     ax.axis('off')
     st.pyplot(fig, use_container_width=False, transparent=True)
-
-    district_data = df.groupby('District')['Total_Price_LKR'].sum().reset_index()
-    district_data['Total_Price_LKR'] = district_data['Total_Price_LKR'] / 1000000
 
 with col2:
     # Create a bar chart
