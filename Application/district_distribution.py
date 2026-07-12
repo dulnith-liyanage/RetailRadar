@@ -1,36 +1,19 @@
 import streamlit as st
-import pandas as pd
 import geopandas as gpd
 import matplotlib.pylab as plt
 import matplotlib.colors as mcolors
 import altair as alt
+from utils import get_raw_data, clean_data
 
 st.sidebar.markdown("*This heat map and bar chart represents the districtwise distribution of the Total Price*")
 
-if "dataset" in st.session_state:
-    df = st.session_state['dataset']
-    st.sidebar.markdown("*Currently using uploaded file.*")
-else:
-    st.sidebar.markdown("*Currently using the demo file. You can analyze your own files by uploading them in welcome page.*")
-    df = pd.read_csv("../data/output/srilanka_retail_2020_2026_small.csv")
-
-# Remove rows with missing CustomerID values
-df = df.dropna(
-    subset=["CustomerID"]
+raw_df, is_uploaded = get_raw_data()
+st.sidebar.markdown(
+    "*Currently using uploaded file.*" if is_uploaded
+    else "*Currently using the demo file. You can analyze your own files by uploading them in welcome page.*"
 )
 
-# Convert CustomerID to integer type
-df["CustomerID"] = df["CustomerID"].astype(int)
-
-# Remove rows with non-positive Quantity values
-df = df[
-    df["Quantity"] > 0
-]
-
-# Remove rows with zero UnitPrice values
-df = df[
-    df["UnitPrice"] > 0
-]
+df = clean_data(raw_df)
 
 # Theme for heatmap and bar chart
 catppuccin_red_shades = [

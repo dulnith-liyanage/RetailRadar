@@ -1,51 +1,19 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
 import plotly.express as px
+from utils import get_raw_data, clean_data
 
 st.set_page_config(page_title="Sales Performance Analysis", page_icon="📈")
 
 st.markdown("# Sales Performance Analysis")
 
-if "dataset" in st.session_state:
-    df = st.session_state['dataset']
-    st.sidebar.markdown("*Currently using uploaded file.*")
-else:
-    st.sidebar.markdown("*Currently using the demo file. You can analyze your own files by uploading them in welcome page.*")
-    df = pd.read_csv("../data/output/srilanka_retail_2020_2026_small.csv")
-
-# Remove rows with missing CustomerID values
-df = df.dropna(
-    subset=["CustomerID"]
+raw_df, is_uploaded = get_raw_data()
+st.sidebar.markdown(
+    "*Currently using uploaded file.*" if is_uploaded
+    else "*Currently using the demo file. You can analyze your own files by uploading them in welcome page.*"
 )
 
-# Convert CustomerID to integer type
-df["CustomerID"] = df["CustomerID"].astype(int)
-
-# Remove rows with non-positive Quantity values
-df = df[
-    df["Quantity"] > 0
-]
-
-# Remove rows with zero UnitPrice values
-df = df[
-    df["UnitPrice"] > 0
-]
-
-## --- Feature Engineering ---
-df["InvoiceDate"] = pd.to_datetime(
-    df["InvoiceDate"]
-)
-
-df["Year"] = df["InvoiceDate"].dt.year
-
-df["Month"] = df["InvoiceDate"].dt.month
-
-df["Month_Name"] = df["InvoiceDate"].dt.month_name()
-
-df["Day"] = df["InvoiceDate"].dt.day_name()
-
-df["Hour"] = df["InvoiceDate"].dt.hour
+df = clean_data(raw_df)
 
 # Initialize columns for layout
 col1, col2 = st.columns(2, gap='large')
