@@ -5,7 +5,6 @@ st.set_page_config(page_title="Welcome")
 st.write("# Welcome to Retail Radar")
 st.sidebar.success("*select a demo above.*")
 
-
 uploaded_file = st.file_uploader("Choose a file (.csv)", accept_multiple_files=False, type=".csv")
 
 if uploaded_file:

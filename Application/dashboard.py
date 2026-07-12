@@ -1,8 +1,9 @@
 import streamlit as st
 
 welcome_page = st.Page("welcome.py", title="Welcome")
-plots_page = st.Page("chart_page.py", title="Sales Performance", icon="📈")
-heatmap_page = st.Page("heatmap_page.py", title="Districtwise Distribution", icon="📌")
+sales_performance_page = st.Page("sales_performance.py", title="Sales Performance", icon="📈")
+district_distribution_page = st.Page("district_distribution.py", title="Districtwise Distribution", icon="📌")
+rfm_page = st.Page("rfm.py", title="Customer Segments", icon="👥")
 
-pg = st.navigation([welcome_page, plots_page, heatmap_page])
+pg = st.navigation([welcome_page, sales_performance_page, district_distribution_page, rfm_page])
 pg.run()
