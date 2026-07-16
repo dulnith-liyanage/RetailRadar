@@ -13,6 +13,164 @@ st.sidebar.markdown(
 
 st.markdown("# Customer Segmentation")
 
+
+#Customer segments
+customer_segments = {
+    # --- VERY RECENT ---
+    "Very Recent, Very Frequent, Very High Value": {"name": "Champions"},
+    "Very Recent, Very Frequent, High Value": {"name": "Top Tier Advocates"},
+    "Very Recent, Very Frequent, Medium Value": {"name": "High-Volume Buyers"},
+    "Very Recent, Very Frequent, Low Value": {"name": "Promotional Power Users"},
+    "Very Recent, Very Frequent, Very Low Value": {"name": "Active Trialists"},
+    
+    "Very Recent, Frequent, Very High Value": {"name": "High-Value Movers"},
+    "Very Recent, Frequent, High Value": {"name": "Core Loyals"},
+    "Very Recent, Frequent, Medium Value": {"name": "Steady Streamers"},
+    "Very Recent, Frequent, Low Value": {"name": "Frequent Bargain Hunters"},
+    "Very Recent, Frequent, Very Low Value": {"name": "Highly Engaged Starters"},
+    
+    "Very Recent, Occasional, Very High Value": {"name": "Big Ticket Whales"},
+    "Very Recent, Occasional, High Value": {"name": "Premium Onboarders"},
+    "Very Recent, Occasional, Medium Value": {"name": "Growing Potentials"},
+    "Very Recent, Occasional, Low Value": {"name": "New Starters"},
+    "Very Recent, Occasional, Very Low Value": {"name": "Casual Trials"},
+    
+    "Very Recent, Infrequent, Very High Value": {"name": "High-Value Explorers"},
+    "Very Recent, Infrequent, High Value": {"name": "Affluent Prospects"},
+    "Very Recent, Infrequent, Medium Value": {"name": "Mid-Tier Prospects"},
+    "Very Recent, Infrequent, Low Value": {"name": "New Prospects"},
+    "Very Recent, Infrequent, Very Low Value": {"name": "Minimal Prospects"},
+    
+    "Very Recent, Rare, Very High Value": {"name": "Instant Luxury Buyers"},
+    "Very Recent, Rare, High Value": {"name": "Premium First-Timers"},
+    "Very Recent, Rare, Medium Value": {"name": "Curious Newcomers"},
+    "Very Recent, Rare, Low Value": {"name": "One-Time Experimenters"},
+    "Very Recent, Rare, Very Low Value": {"name": "Entry-Level Registrations"},
+
+    # --- RECENT ---
+    "Recent, Very Frequent, Very High Value": {"name": "Consistent Champions"},
+    "Recent, Very Frequent, High Value": {"name": "Reliable Enthusiasts"},
+    "Recent, Very Frequent, Medium Value": {"name": "Active Volume Buyers"},
+    "Recent, Very Frequent, Low Value": {"name": "Systematic Bargainers"},
+    "Recent, Very Frequent, Very Low Value": {"name": "Active Minimalists"},
+    
+    "Recent, Frequent, Very High Value": {"name": "High-Value Core"},
+    "Recent, Frequent, High Value": {"name": "Standard Core Loyals"},
+    "Recent, Frequent, Medium Value": {"name": "Mid-Market Regulars"},
+    "Recent, Frequent, Low Value": {"name": "Regular Discount Seekers"},
+    "Recent, Frequent, Very Low Value": {"name": "Low-Value Regulars"},
+    
+    "Recent, Occasional, Very High Value": {"name": "Spur-of-the-Moment Whales"},
+    "Recent, Occasional, High Value": {"name": "Nurture Candidates"},
+    "Recent, Occasional, Medium Value": {"name": "Satisfied Neutrals"},
+    "Recent, Occasional, Low Value": {"name": "Shallow Buyers"},
+    "Recent, Occasional, Very Low Value": {"name": "Low-Priority Neutrals"},
+    
+    "Recent, Infrequent, Very High Value": {"name": "Selective Premium Spenders"},
+    "Recent, Infrequent, High Value": {"name": "Warm Prospects"},
+    "Recent, Infrequent, Medium Value": {"name": "Standard Prospects"},
+    "Recent, Infrequent, Low Value": {"name": "Developing Shoppers"},
+    "Recent, Infrequent, Very Low Value": {"name": "Low-Margin Contacts"},
+    
+    "Recent, Rare, Very High Value": {"name": "Spontaneous Premium Spenders"},
+    "Recent, Rare, High Value": {"name": "Casual Premium Buyers"},
+    "Recent, Rare, Medium Value": {"name": "Standard Visitors"},
+    "Recent, Rare, Low Value": {"name": "Passing Trade"},
+    "Recent, Rare, Very Low Value": {"name": "Inactive New Leads"},
+
+    # --- MODERATE ---
+    "Moderate, Very Frequent, Very High Value": {"name": "Slowing VIPs"},
+    "Moderate, Very Frequent, High Value": {"name": "Steady Volume Customers"},
+    "Moderate, Very Frequent, Medium Value": {"name": "Stable Bulk Purchasers"},
+    "Moderate, Very Frequent, Low Value": {"name": "Habitual Coupon Shoppers"},
+    "Moderate, Very Frequent, Very Low Value": {"name": "Low-Yield Regulars"},
+    
+    "Moderate, Frequent, Very High Value": {"name": "High-Value Mainstays"},
+    "Moderate, Frequent, High Value": {"name": "Standard Mainstays"},
+    "Moderate, Frequent, Medium Value": {"name": "Middle-Tier Core"},
+    "Moderate, Frequent, Low Value": {"name": "Value-Conscious Regulars"},
+    "Moderate, Frequent, Very Low Value": {"name": "Marginal Regulars"},
+    
+    "Moderate, Occasional, Very High Value": {"name": "Intermittent Spenders"},
+    "Moderate, Occasional, High Value": {"name": "Periodic Premium Shoppers"},
+    "Moderate, Occasional, Medium Value": {"name": "Average Consumers"},
+    "Moderate, Occasional, Low Value": {"name": "Casual Occasionals"},
+    "Moderate, Occasional, Very Low Value": {"name": "Unprofitable Occasionals"},
+    
+    "Moderate, Infrequent, Very High Value": {"name": "Infrequent Luxury Accounts"},
+    "Moderate, Infrequent, High Value": {"name": "Unrealized Value Accounts"},
+    "Moderate, Infrequent, Medium Value": {"name": "Quiet Neutrals"},
+    "Moderate, Infrequent, Low Value": {"name": "Fading Accounts"},
+    "Moderate, Infrequent, Very Low Value": {"name": "Stagnant Leads"},
+    
+    "Moderate, Rare, Very High Value": {"name": "Isolated Event Buyers"},
+    "Moderate, Rare, High Value": {"name": "Infrequent High-Tier Buyers"},
+    "Moderate, Rare, Medium Value": {"name": "Dormant Trials"},
+    "Moderate, Rare, Low Value": {"name": "Stalled Trials"},
+    "Moderate, Rare, Very Low Value": {"name": "Negligible Leads"},
+
+    # --- LAPSING ---
+    "Lapsing, Very Frequent, Very High Value": {"name": "Critical At-Risk VIPs"},
+    "Lapsing, Very Frequent, High Value": {"name": "At-Risk VIPs"},
+    "Lapsing, Very Frequent, Medium Value": {"name": "Slowing High-Volume Accounts"},
+    "Lapsing, Very Frequent, Low Value": {"name": "Departing Frequency Shoppers"},
+    "Lapsing, Very Frequent, Very Low Value": {"name": "Fading Micro-Volume Users"},
+    
+    "Lapsing, Frequent, Very High Value": {"name": "Priority Re-engagement Targets"},
+    "Lapsing, Frequent, High Value": {"name": "Slowing Loyals"},
+    "Lapsing, Frequent, Medium Value": {"name": "Drifting Regulars"},
+    "Lapsing, Frequent, Low Value": {"name": "Fading Bargain Shoppers"},
+    "Lapsing, Frequent, Very Low Value": {"name": "Drifting Low-Tier Regulars"},
+    
+    "Lapsing, Occasional, Very High Value": {"name": "Slowing Big Spenders"},
+    "Lapsing, Occasional, High Value": {"name": "Cooling Premium Shoppers"},
+    "Lapsing, Occasional, Medium Value": {"name": "Cooling Mid-Tier Shoppers"},
+    "Lapsing, Occasional, Low Value": {"name": "Drifting Casuals"},
+    "Lapsing, Occasional, Very Low Value": {"name": "Neglected Contacts"},
+    
+    "Lapsing, Infrequent, Very High Value": {"name": "At-Risk Whale Accounts"},
+    "Lapsing, Infrequent, High Value": {"name": "Detached Premium Accounts"},
+    "Lapsing, Infrequent, Medium Value": {"name": "Slowing Occasionals"},
+    "Lapsing, Infrequent, Low Value": {"name": "Unresponsive Leads"},
+    "Lapsing, Infrequent, Very Low Value": {"name": "Leaving Low-Value Accounts"},
+    
+    "Lapsing, Rare, Very High Value": {"name": "Dormant Luxury Accounts"},
+    "Lapsing, Rare, High Value": {"name": "Dormant High-Value Contacts"},
+    "Lapsing, Rare, Medium Value": {"name": "Fading Single-Buyers"},
+    "Lapsing, Rare, Low Value": {"name": "Inactive Casuals"},
+    "Lapsing, Rare, Very Low Value": {"name": "Cold Prospects"},
+
+    # --- LAPSED ---
+    "Lapsed, Very Frequent, Very High Value": {"name": "Lost High-Value Legends"},
+    "Lapsed, Very Frequent, High Value": {"name": "Lost Advocates"},
+    "Lapsed, Very Frequent, Medium Value": {"name": "Lost Volume Accounts"},
+    "Lapsed, Very Frequent, Low Value": {"name": "Abandoned Repeaters"},
+    "Lapsed, Very Frequent, Very Low Value": {"name": "Abandoned Micro-Users"},
+    
+    "Lapsed, Frequent, Very High Value": {"name": "Lost VIPs"},
+    "Lapsed, Frequent, High Value": {"name": "Former Loyals"},
+    "Lapsed, Frequent, Medium Value": {"name": "Lost Mid-Tier Regulars"},
+    "Lapsed, Frequent, Low Value": {"name": "Churned Regulars"},
+    "Lapsed, Frequent, Very Low Value": {"name": "Churned Low-Tier Regulars"},
+    
+    "Lapsed, Occasional, Very High Value": {"name": "Lost High-Value Splurgers"},
+    "Lapsed, Occasional, High Value": {"name": "Lost High-Tier Casuals"},
+    "Lapsed, Occasional, Medium Value": {"name": "Lost Mid-Tier Casuals"},
+    "Lapsed, Occasional, Low Value": {"name": "Inactive Casual Shoppers"},
+    "Lapsed, Occasional, Very Low Value": {"name": "Zero-Engagement Accounts"},
+    
+    "Lapsed, Infrequent, Very High Value": {"name": "Lost One-Time Whales"},
+    "Lapsed, Infrequent, High Value": {"name": "Lost High-Value Contacts"},
+    "Lapsed, Infrequent, Medium Value": {"name": "Lost Mid-Tier Accounts"},
+    "Lapsed, Infrequent, Low Value": {"name": "Lost Accounts"},
+    "Lapsed, Infrequent, Very Low Value": {"name": "Dead Leads"},
+    
+    "Lapsed, Rare, Very High Value": {"name": "Historical Luxury Sign-ups"},
+    "Lapsed, Rare, High Value": {"name": "Historical High-Value Sign-ups"},
+    "Lapsed, Rare, Medium Value": {"name": "Historical Mid-Tier Sign-ups"},
+    "Lapsed, Rare, Low Value": {"name": "Historical Low-Value Sign-ups"},
+    "Lapsed, Rare, Very Low Value": {"name": "Defunct Leads"}
+}
 df = clean_data(raw_df)
 
 snapshot_date = df["InvoiceDate"].max() + pd.Timedelta(days=1)
@@ -80,9 +238,11 @@ cluster_counts = cluster_counts.merge(
     how='left'
 )
 
+cluster_counts['Type'] = cluster_counts['Label'].apply(lambda x: customer_segments.get(x, {}).get("name", f"Custom Segment ({x})"))
+
 pfig = px.pie(
         cluster_counts, 
-        names='Label', 
+        names='Type', 
         values='Count', 
         hole=0.7,  # Turns the pie chart into a donut
         # Matching the color palette sequence roughly to your current pastel colors:
@@ -121,4 +281,8 @@ st.plotly_chart(pfig, use_container_width=True)
 # Top Customers
 top_customers = customers.sort_values(by="Total_Price_LKR", ascending=False).head(10)
 st.write("### Top 10 Customers by Total Amount Spent")
-st.dataframe(top_customers[["CustomerID", "Total_Price_LKR", "Label"]].reset_index(drop=True))
+top_customers['Type'] = top_customers['Label'].apply(lambda x: customer_segments[x]['name'])
+st.dataframe(top_customers[["CustomerID", "Total_Price_LKR", "Type"]].reset_index(drop=True))
+
+st.markdown("* Customer segments definitions")
+st.dataframe(cluster_counts[['Type', 'Label']])
