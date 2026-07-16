@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import altair as alt
 from utils import get_raw_data, clean_data
 
 st.set_page_config(page_title="Sales Performance Analysis", page_icon="📈")
@@ -122,16 +123,31 @@ with col4:
     st.line_chart(hourly_sales, x='Hour', y='Total_Price_LKR', y_label='Total Revenue in Million LKR'
                   ,color="#8aadf4")
 
-col5, col6 = st.columns(2, gap='large')
 
-with col5:
-    st.markdown("### Top 10 Products by revenue ###")
-    top_products = df.groupby('Description')['Total_Price_LKR'].sum().sort_values(ascending=False).head(10).reset_index()
-    top_products = top_products[::-1].reset_index(drop=True)
-    top_products['Total_Price_LKR'] = top_products['Total_Price_LKR'] / 1000000
-    st.bar_chart(top_products, x='Description', y="Total_Price_LKR", x_label='Product', y_label='Total price of sold items', color="#c29df1")
-with col6:
-    st.markdown("### Top 10 Products by sold quantity ###")
-    top_products_by_q = df.groupby('Description')['Quantity'].sum().sort_values(ascending=False).head(10).reset_index()
-    top_products_by_q = top_products_by_q[::-1].reset_index(drop=True)
-    st.bar_chart(top_products_by_q, x = 'Description', y = 'Quantity', x_label='Product', y_label='Sold Quantity', color="#c29df1")
+st.markdown("### Top 10 Products by revenue ###")
+top_products = df.groupby('Description')['Total_Price_LKR'].sum().sort_values(ascending=False).head(10).reset_index()
+top_products['Total_Price_LKR'] = top_products['Total_Price_LKR'] / 1000000
+
+st.altair_chart(
+        alt.Chart(top_products)
+        .mark_bar()
+        .encode(
+            y=alt.Y('Description', sort='-x', axis=alt.Axis(labelLimit=300), title=None),  # Adjust label limit for better visibility
+            x=alt.X('Total_Price_LKR', title='Total Revenue in Million LKR'),
+            color=alt.value("#a6da95"),
+        )
+)
+
+st.markdown("### Top 10 Products by sold quantity ###")
+top_products_by_q = df.groupby('Description')['Quantity'].sum().sort_values(ascending=False).head(10).reset_index()
+top_products_by_q = top_products_by_q[::-1].reset_index(drop=True)
+
+st.altair_chart(
+        alt.Chart(top_products_by_q)
+        .mark_bar()
+        .encode(
+            y=alt.Y('Description', sort='-x', axis=alt.Axis(labelLimit=300), title=None),  # Adjust label limit for better visibility
+            x=alt.X('Quantity', title='Sold Quantity'),
+            color=alt.value("#c29df1"),
+        )
+)
