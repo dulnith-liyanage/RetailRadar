@@ -1,7 +1,7 @@
 import streamlit as st
 from groq import Groq
 
-client = Groq(api_key="<API KEY>")
+client = Groq(api_key=st.secrets['API_KEY'])
 
 if "model" not in st.session_state:
     st.session_state["model"] = "llama-3.3-70b-versatile"
