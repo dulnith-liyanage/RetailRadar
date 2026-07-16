@@ -3,3 +3,4 @@
 Application/__pycache__
 venv
 Application/streamlitTests.py
+Application/.streamlit/secrets.toml
