@@ -190,7 +190,7 @@ rfm["M-Score"] = pd.qcut(rfm["Monetary"], 5, labels=[1, 2, 3, 4, 5])
 scaler = StandardScaler()
 rfm_scaled = scaler.fit_transform(rfm[["Recency", "Frequency", "Monetary"]])
 
-kmeans = KMeans(n_clusters=5, random_state=42, n_init=10)
+kmeans = KMeans(n_clusters=6, random_state=42, n_init=10)
 rfm["Cluster"] = kmeans.fit_predict(rfm_scaled)
 
 profile = rfm.groupby('Cluster')[['Recency', 'Frequency', 'Monetary']].mean().reset_index()
