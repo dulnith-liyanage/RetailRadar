@@ -4,15 +4,12 @@ import pandas as pd
 
 client = Groq(api_key=st.secrets['API_KEY'])
 
-# --- ADD THIS ENTIRE NEW BLOCK HERE ---
 @st.cache_data
 def load_data():  # add load data function
     df = pd.read_csv("../data/output/srilanka_retail_2020_2026_small.csv")
-    return df.head(100).to_string() # Convert the first 100 rows to text
+    return df.head(100).to_string() 
 
 dataset_string = load_data()
-# --------------------------------------  
-
 
 if "model" not in st.session_state:
     st.session_state["model"] = "llama-3.3-70b-versatile"
