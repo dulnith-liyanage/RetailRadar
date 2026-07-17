@@ -1,7 +1,18 @@
 import streamlit as st
 from groq import Groq
+import pandas as pd
 
 client = Groq(api_key=st.secrets['API_KEY'])
+
+# --- ADD THIS ENTIRE NEW BLOCK HERE ---
+@st.cache_data
+def load_data():  # add load data function
+    df = pd.read_csv("../data/output/srilanka_retail_2020_2026_small.csv")
+    return df.head(100).to_string() # Convert the first 100 rows to text
+
+dataset_string = load_data()
+# --------------------------------------  
+
 
 if "model" not in st.session_state:
     st.session_state["model"] = "llama-3.3-70b-versatile"
@@ -27,9 +38,9 @@ if prompt := st.chat_input("What is up?"):
     with st.chat_message("assistant"):
     # 1. Create the base array with your system rules
         api_messages = [
-            {
-                "role": "system", 
-                "content": "Your name is 'Insight.AI'. You are a chatbot of 'Retail Radar', a service used to analyze retail data."
+            {   "role": "system", 
+                "content": f"Your name is 'Insight.AI'. You are a chatbot of 'Retail Radar', a service used to analyze retail data. Use this dataset to answer questions:\n\n{dataset_string}"
+               # changed this 
             }
         ]
         
