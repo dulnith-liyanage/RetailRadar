@@ -6,6 +6,13 @@ import pandas as pd
 # Initialize Groq Client
 client = Groq(api_key=st.secrets['API_KEY'])
 
+@st.cache_data
+def load_data():  # add load data function
+    df = pd.read_csv("../data/output/srilanka_retail_2020_2026_small.csv")
+    return df.head(100).to_string() 
+
+dataset_string = load_data()
+
 # DataFrame Integration
 raw_df, is_uploaded = get_raw_data()
 df = clean_data(raw_df)
@@ -55,6 +62,13 @@ if prompt := st.chat_input("What is up?"):
 
     # Generate assistant response ONLY when a new prompt is submitted
     with st.chat_message("assistant"):
+    # 1. Create the base array with your system rules
+        api_messages = [
+            {   "role": "system", 
+                "content": f"Your name is 'Insight.AI'. You are a chatbot of 'Retail Radar', a service used to analyze retail data. Use this dataset to answer questions:\n\n{dataset_string}"
+               # changed this 
+            }
+        ]
         
         # --- 2. STRUCTURING THE SYSTEM CONTEXT ---
         system_prompt = f"""You are 'Insight.AI', the specialized chatbot for 'Retail Radar' analytical platform.
