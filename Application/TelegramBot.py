@@ -9,6 +9,8 @@ logging.basicConfig(
     level=logging.INFO
 )
 
+
+
 async def hello(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     print("Received a /hello command!") # Visible in your terminal
     #add help here
@@ -20,7 +22,8 @@ if __name__ == '__main__':
     print("Starting bot... Press Ctrl+C to stop.")
     
     # PUT YOUR ACTUAL TOKEN HERE
-    app = ApplicationBuilder().token("8912754717:AAGPBWe5bS4WzQJ6HlqWeTCmzAlvB3ZzTvQ").build()
+    api_key=st.secrets['TELE_BOT_API']
+    app = ApplicationBuilder().token(api_key).build()
     
     app.add_handler(CommandHandler("start", hello))
     
