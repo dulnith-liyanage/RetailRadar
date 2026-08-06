@@ -18,7 +18,7 @@ MODEL_NAME = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 
 
 GROQ_API_KEY = st.secrets['API_KEY']
-TELEGRAM_BOT_TOKEN = st.secrets['8912754717:AAGPBWe5bS4WzQJ6HlqWeTCmzAlvB3ZzTvQ']
+TELEGRAM_BOT_TOKEN = st.secrets['TELE_BOT_API']
 if not GROQ_API_KEY:
     raise RuntimeError("Missing GROQ API key. Set the API_KEY environment variable.")
 
