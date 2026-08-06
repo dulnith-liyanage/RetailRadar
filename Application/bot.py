@@ -1,6 +1,6 @@
 import streamlit as st
 from groq import Groq
-from utils import get_raw_data, clean_data
+from utils import get_raw_data, clean_data, get_segment_summary
 import pandas as pd
 
 # Initialize Groq Client
@@ -39,6 +39,32 @@ districtwise_data = df.groupby(['District'])['Total_Price_LKR'].sum().reset_inde
 districtwise_data['Total_Price_LKR'] = districtwise_data['Total_Price_LKR'] / 100000
 districtwise_data_md = districtwise_data.to_markdown(index=False)
 
+# --- NEW: Product Performance ---
+product_revenue = df.groupby('Description')['Total_Price_LKR'].sum().sort_values(ascending=False).reset_index()
+product_revenue['Total_Price_LKR'] = product_revenue['Total_Price_LKR'] / 1000000
+top_products_by_revenue_md = product_revenue.head(15).to_markdown(index=False)
+bottom_products_by_revenue_md = product_revenue.tail(10).sort_values('Total_Price_LKR').to_markdown(index=False)
+
+product_quantity = df.groupby('Description')['Quantity'].sum().sort_values(ascending=False).reset_index()
+top_products_by_quantity_md = product_quantity.head(15).to_markdown(index=False)
+
+# --- NEW: Day-of-Week Revenue Trend (in Millions LKR) ---
+day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+weekly_sales = df.groupby('Day')['Total_Price_LKR'].sum().reset_index()
+weekly_sales['Total_Price_LKR'] = weekly_sales['Total_Price_LKR'] / 1000000
+weekly_sales['Day'] = pd.Categorical(weekly_sales['Day'], categories=day_order, ordered=True)
+weekly_sales = weekly_sales.sort_values('Day')
+weekly_sales_md = weekly_sales.to_markdown(index=False)
+
+# --- NEW: Hourly Revenue Trend (in Millions LKR) ---
+hourly_sales = df.groupby('Hour')['Total_Price_LKR'].sum().reset_index()
+hourly_sales['Total_Price_LKR'] = hourly_sales['Total_Price_LKR'] / 1000000
+hourly_sales_md = hourly_sales.to_markdown(index=False)
+
+# --- Customer Segmentation (RFM + K-Means) ---
+customers, cluster_counts, segment_summary_md = get_segment_summary(df)
+total_customers = customers['CustomerID'].nunique()
+
 # --- STREAMLIT CHAT UI ---
 if "model" not in st.session_state:
     st.session_state["model"] = "llama-3.3-70b-versatile"
@@ -62,15 +88,8 @@ if prompt := st.chat_input("What is up?"):
 
     # Generate assistant response ONLY when a new prompt is submitted
     with st.chat_message("assistant"):
-    # 1. Create the base array with your system rules
-        api_messages = [
-            {   "role": "system", 
-                "content": f"Your name is 'Insight.AI'. You are a chatbot of 'Retail Radar', a service used to analyze retail data. Use this dataset to answer questions:\n\n{dataset_string}"
-               # changed this 
-            }
-        ]
-        
-        # --- 2. STRUCTURING THE SYSTEM CONTEXT ---
+
+        # --- STRUCTURING THE SYSTEM CONTEXT ---
         system_prompt = f"""You are 'Insight.AI', the specialized chatbot for 'Retail Radar' analytical platform.
         Your job is to deliver concise data insights based on the matrices provided below.
         All revenue metrics are customized for Sri Lankan Rupees (LKR).
@@ -89,8 +108,47 @@ if prompt := st.chat_input("What is up?"):
 
         [DISTRICT-WISE REVENUE PERFORMANCE (In Lakhs/100k LKR)]:
         {districtwise_data_md}
-        
-        Rules: Keep answers business-oriented, direct, and factual. Always clarify whether monetary values are displayed in Millions or Lakhs based on the data keys above."""
+
+        [TOP 15 PRODUCTS BY REVENUE (In Millions LKR)]:
+        {top_products_by_revenue_md}
+
+        [TOP 15 PRODUCTS BY SOLD QUANTITY (Units)]:
+        {top_products_by_quantity_md}
+
+        [BOTTOM 10 PRODUCTS BY REVENUE (In Millions LKR)]:
+        {bottom_products_by_revenue_md}
+
+        [DAY-OF-WEEK REVENUE TREND (In Millions LKR)]:
+        {weekly_sales_md}
+
+        [HOURLY REVENUE TREND (In Millions LKR)]:
+        {hourly_sales_md}
+
+        [CUSTOMER SEGMENTATION OVERVIEW]:
+        Total unique customers: {total_customers}
+        Customers are grouped via RFM (Recency, Frequency, Monetary) analysis and K-Means clustering
+        into behavioral segments. Segment name, customer count, and average spend per customer
+        (in thousand LKR) are shown below:
+        {segment_summary_md}
+
+        Rules: Keep answers business-oriented, direct, and factual. Always clarify whether monetary
+        values are displayed in Millions, Lakhs, or Thousands based on the data keys above. When asked
+        about customers, loyalty, churn risk, or segments, use the CUSTOMER SEGMENTATION OVERVIEW table
+        rather than guessing — if a segment isn't in the table, say so instead of inventing one. When
+        asked about timing, footfall, staffing, or "best time to shop/promote", use the DAY-OF-WEEK and
+        HOURLY REVENUE TREND tables rather than guessing. When asked about products, bestsellers, top
+        sellers, or worst/weakest performers, use the TOP/BOTTOM PRODUCTS BY REVENUE and TOP PRODUCTS BY
+        SOLD QUANTITY tables rather than guessing — if a product isn't in these tables, say you only
+        have visibility into the top and bottom performers, not the full catalog.
+
+        Answer format: Before answering a "best/worst/highest/lowest/top" question, scan the full
+        relevant table yourself and identify the single row with the correct max or min value — do
+        this silently, do not narrate the scanning process. State ONLY that final answer as your
+        opening sentence, with its exact figure (e.g. "The best performing hour is 18:00, with 22.0
+        million LKR in revenue."). Never present one answer and then correct yourself to a different
+        one in the same response — if you catch a discrepancy, resolve it before writing, not after.
+        Do not list runner-up or nearby values unless the user explicitly asks for a ranking or
+        comparison. Keep answers to 1-3 sentences unless the user asks for more detail or a breakdown."""
 
         api_messages = [{"role": "system", "content": system_prompt}]
         
