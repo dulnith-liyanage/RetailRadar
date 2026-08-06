@@ -1,67 +1,120 @@
-# RetailRadar
- 
-RetailRadar is a Streamlit dashboard for exploring a synthetic Sri Lankan retail transaction dataset, modeled on the UCI Online Retail dataset but localized to Sri Lanka — LKR pricing built on historically grounded exchange rates, districtwise geography, and demand patterns shaped by real events like COVID-19 and the 2022 economic crisis.
- 
+# Retail Radar
+
+**AI-powered retail analytics dashboard for the Sri Lankan retail sector.**
+
+Retail Radar turns raw retail transaction data into revenue trends, regional performance maps, AI-driven customer segmentation, and an in-app conversational analyst — all in a single multi-page Streamlit app.
+
+Built for **Data Odyssey 2026**, AI and Data Science Club, General Sir John Kotelawala Defence University.
+
+---
+
 ## Features
- 
-- **Bring your own data** — upload a CSV on the Welcome page, or explore the bundled demo dataset out of the box.
-- **Sales Performance Analysis** — revenue broken down by year (donut chart), month, year × month, day of week, and hour, using a mix of Plotly, native Streamlit charts, and line charts.
-- **Districtwise Distribution** — a choropleth map of Sri Lanka's districts paired with a matching ranked bar chart, sharing a single custom color palette for visual consistency.
+
+| Page | What it does |
+|---|---|
+| **Welcome** | Landing page; lets you upload your own retail CSV or use the built-in demo dataset |
+| **Sales Performance** 📈 | Revenue by year, month, and year-over-year comparison; weekly and hourly revenue trends; top 10 products by revenue and by quantity sold |
+| **Districtwise Distribution** 📌 | Choropleth map of revenue by Sri Lankan district, paired with a ranked bar chart |
+| **Customer Segments** 👥 | RFM (Recency, Frequency, Monetary) analysis with K-Means clustering to automatically group customers into behavioral segments (e.g. Champions, At-Risk VIPs, Lost Accounts); top 10 customers by spend; full segment definition table |
+| **Insight.AI** 🤖 | A chatbot grounded in the dashboard's own statistics (descriptive stats, correlation matrix, revenue breakdowns) that answers business questions in plain language, powered by Groq |
+
+---
+
+## Tech Stack
+
+- **Framework:** [Streamlit](https://streamlit.io/) (multi-page app via `st.navigation`)
+- **Data processing:** pandas
+- **Visualization:** Plotly Express, Altair, `st.bar_chart` / `st.line_chart`, Matplotlib (choropleth)
+- **Geospatial:** GeoPandas
+- **Machine learning:** scikit-learn (`StandardScaler`, `KMeans`)
+- **LLM chatbot:** [Groq](https://groq.com/) API (`llama-3.3-70b-versatile`)
+
+---
+
 ## Project Structure
- 
+
 ```
-RetailRadar/
-├── Application/
-│   ├── .streamlit/
-│   │   └── config.toml        # Streamlit theme configuration
-│   ├── dashboard.py           # Entry point — wires up multi-page navigation
-│   ├── welcome.py             # Landing page + CSV upload
-│   ├── chart_page.py          # Sales Performance Analysis page
-│   ├── heatmap_page.py        # Districtwise Distribution page (map + bar chart)
-│   └── streamlitTests.py      # Scratch/dev file — not wired into navigation
-├── data/
-│   ├── input/                # Dataset(s) to be processed
-│   ├── output/                # Processed dataset(s) consumed by the app
-│   └── geodata/                # Sri Lanka district boundary GeoJSON
-├── data_pipeline.py            # Cleans and processes the raw dataset
-├── sri_lankanize_data.py       # Localizes a base retail dataset to Sri Lankan context
-│                                 (LKR conversion, districts, COVID/crisis-era weighting)
-├── notebook.ipynb              # Exploratory analysis / prototyping
-├── requirements.txt
-└── README.md
+Application/
+├── dashboard.py              # Entry point — defines app navigation across all pages
+├── welcome.py                 # Landing page / file upload
+├── sales_performance.py       # Revenue trend charts
+├── district_distribution.py   # Choropleth + district revenue ranking
+├── rfm.py                     # RFM analysis, K-Means clustering, customer segments
+├── bot.py                     # Insight.AI chatbot (Groq-powered)
+└── utils.py                   # Shared data loading & cleaning functions
+
+data/
+├── output/
+│   ├── srilanka_retail_2020_2026.csv         # Full demo dataset
+│   └── srilanka_retail_2020_2026_small.csv   # Sampled dataset (used as chatbot context)
+└── geodata/
+    └── District_geo.json      # Sri Lanka district boundaries (GeoJSON)
 ```
- 
+
+---
+
 ## Getting Started
- 
+
 ### Prerequisites
 - Python 3.9+
-- pip
+- A [Groq API key](https://console.groq.com/) for the Insight.AI chatbot
+
 ### Installation
+
 ```bash
-git clone <your-repo-url>
-cd RetailRadar
+git clone <repository-url>
+cd <repository-folder>
 pip install -r requirements.txt
 ```
- 
+
+**Key dependencies** (add to `requirements.txt` if not already present):
+```
+streamlit
+pandas
+plotly
+altair
+geopandas
+matplotlib
+scikit-learn
+groq
+```
+
+### Configuration
+
+Insight.AI requires a Groq API key. Create `Application/.streamlit/secrets.toml`:
+
+```toml
+API_KEY = "your-groq-api-key-here"
+```
+
+### Data
+
+Expected columns in the retail dataset include (at minimum):
+`CustomerID`, `InvoiceNo`, `InvoiceDate`, `Description`, `Quantity`, `UnitPrice`, `Total_Price_LKR`, `District`
+
 ### Run the app
+
 ```bash
 cd Application
 streamlit run dashboard.py
 ```
- 
-## Data
- 
-The app expects a processed CSV under `data/output/` and a district-level boundary file at `data/geodata/District_geo.json`. If no file is uploaded via the Welcome page, it falls back to the bundled demo dataset.
- 
-Expected columns include: `InvoiceDate`, `CustomerID`, `Quantity`, `UnitPrice`, `Total_Price_LKR`, `District`.
- 
-Raw data is cleaned via `data_pipeline.py`, and `sri_lankanize_data.py` handles localizing a base retail dataset (currency conversion to LKR, district assignment, and economic-era weighting) before it's consumed by the dashboard.
- 
-## Tech Stack
- 
-- [Streamlit](https://streamlit.io/) — app framework & multi-page navigation
-- [Pandas](https://pandas.pydata.org/) — data wrangling
-- [GeoPandas](https://geopandas.org/) — choropleth geometry handling
-- [Altair](https://altair-viz.github.io/) — bar chart with custom color scales
-- [Plotly Express](https://plotly.com/python/plotly-express/) — donut chart
-- [Matplotlib](https://matplotlib.org/) — choropleth rendering
+
+The app will open in your browser, defaulting to the **Welcome** page. From the sidebar, upload your own CSV or continue with the demo dataset — every other page (Sales Performance, Districtwise Distribution, Customer Segments, Insight.AI) will automatically reflect whichever dataset is active.
+
+---
+
+## How It Works
+
+1. **Upload or use demo data** — `utils.get_raw_data()` checks session state for an uploaded file, falling back to the bundled demo CSV.
+2. **Clean & process** — `utils.clean_data()` drops missing customer IDs, filters invalid quantities/prices, and derives Year, Month, Day, and Hour fields from the invoice date.
+3. **Visualize** — Each page aggregates the cleaned data into the metrics and charts relevant to it (revenue trends, district totals, RFM scores).
+4. **Segment customers** — `rfm.py` computes Recency, Frequency, and Monetary scores per customer, scales them, and runs K-Means (6 clusters) to assign each customer to a named behavioral segment.
+5. **Ask Insight.AI** — `bot.py` pre-computes summary statistics and feeds them into a system prompt for the Groq LLM, so the chatbot's answers are grounded in the same numbers shown elsewhere in the app.
+
+---
+
+## Competition Context
+
+This project was developed for **Data Odyssey 2026**, organized by the AI and Data Science Club at General Sir John Kotelawala Defence University, under the theme *"Humanity x AI: The New Age of Innovation."*
+
+---
