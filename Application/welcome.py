@@ -32,7 +32,7 @@ st.caption(
     "regional performance, customer segmentation, and an in-app AI analyst, all in one dashboard."
 )
 
-st.sidebar.success("*select a demo above.*")
+st.sidebar.success("*Select a module to begin.*")
 
 # ============================================================
 # DATA SOURCE
