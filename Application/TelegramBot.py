@@ -1,3 +1,5 @@
+#!.venv/bin/python
+
 import logging
 import os
 from functools import lru_cache
@@ -16,7 +18,6 @@ logging.basicConfig(
 
 MODEL_NAME = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 
-
 GROQ_API_KEY = st.secrets['API_KEY']
 TELEGRAM_BOT_TOKEN = st.secrets['TELE_BOT_API']
 if not GROQ_API_KEY:
@@ -27,16 +28,9 @@ if not TELEGRAM_BOT_TOKEN:
 
 client = Groq(api_key=GROQ_API_KEY)
 
-
-@lru_cache(maxsize=1)
-def load_data() -> str:
-    df = pd.read_csv("../data/output/srilanka_retail_2020_2026_small.csv")
-    return df.head(100).to_string()
-
-
-dataset_string = load_data()
 raw_df, _ = get_raw_data()
 df = clean_data(raw_df)
+dataset_string = df.head(100).to_string()
 
 describe = df.describe().to_markdown(index=True)
 correlation = df.corr(numeric_only=True).to_markdown(index=True)
