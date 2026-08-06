@@ -185,7 +185,7 @@ CUSTOMER_SEGMENTS = {
         "Lapsed, Rare, High Value": {"name": "Historical High-Value Sign-ups"},
         "Lapsed, Rare, Medium Value": {"name": "Historical Mid-Tier Sign-ups"},
         "Lapsed, Rare, Low Value": {"name": "Historical Low-Value Sign-ups"},
-        "Lapsed, Rare, Very Low Value": {"name": "Defunct Leads"}
+        "Lapsed, Rare, Very Low Value": {"name": "Defunct Leads"}   
 }
 
 _recency_labels = ['Very Recent', 'Recent', 'Moderate', 'Lapsing', 'Lapsed']
