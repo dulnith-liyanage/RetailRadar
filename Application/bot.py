@@ -6,6 +6,23 @@ import pandas as pd
 # Initialize Groq Client
 client = Groq(api_key=st.secrets['API_KEY'])
 
+st.markdown(
+    """
+    <style>
+    /* User Avatar: Nord11 (Red/Frost accent) */
+    [data-testid="stChatMessageAvatarUser"] {
+        background-color: #EBCB8B !important;
+    }
+
+    /* Assistant/Bot Avatar: Nord10 (Deep Blue) or Nord14 (Green) */
+    [data-testid="stChatMessageAvatarAssistant"] {
+        background-color: #d08770 !important; 
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 @st.cache_data
 def load_data():  # add load data function
     df = pd.read_csv("../data/output/srilanka_retail_2020_2026_small.csv")
