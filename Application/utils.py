@@ -1,7 +1,10 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
+from sklearn.model_selection import GridSearchCV
+from sklearn.ensemble import RandomForestRegressor
 
 def get_raw_data():
     if "dataset" in st.session_state:
@@ -257,3 +260,132 @@ def get_segment_summary(df):
     summary_md = display_table.to_markdown(index=False)
 
     return customers, cluster_counts, summary_md
+
+
+@st.cache_data
+def get_sales_forecast(df, is_uploaded):
+    """
+    Trains a RandomForestRegressor on MONTHLY revenue and forecasts the next 12 months
+    (the "next year"), compared against the previous 12 months (the "previous year") of
+    actual revenue — both measured as a rolling 12-month window anchored on the last
+    recorded month in the dataset, not the calendar year.
+    Shared by sales_performance.py (chart), bot.py, and TelegramBot.py (LLM context) so
+    all three always agree on the same forecast.
+
+    Returns:
+      - history_recent: previous year (last 12 months) of ACTUAL monthly revenue
+                         (Date, Sales in M LKR, Quarter_Label, Year_Label)
+      - forecast_dataset: next year (next 12 months) of FORECASTED monthly revenue
+                         (Date, Sales in M LKR, Quarter_Label, Year_Label)
+      - combined: history_recent + forecast_dataset concatenated, with a 'Type' column,
+                  for continuous charting
+      - forecast_summary_md: markdown table of the 12-month forecast, ready for an LLM prompt
+      - peak_period: row (Series) of the single highest-forecasted month
+      - best_model: the fitted model (str-able, useful for a "Model: ..." caption)
+    """
+    df = df.copy()
+    df["InvoiceDate"] = pd.to_datetime(df["InvoiceDate"])
+
+    # Aggregate to calendar MONTH (not day) — a quarterly-planning view needs
+    # monthly resolution, not daily noise
+    df["InvoiceMonth"] = df["InvoiceDate"].dt.to_period("M").dt.to_timestamp()
+    monthly_sales = df.groupby("InvoiceMonth")["Total_Price_LKR"].sum().reset_index()
+    monthly_sales = monthly_sales.rename(columns={"InvoiceMonth": "Date"})
+
+    # Fill any gap months with 0 revenue so "previous year" means the actual
+    # last 12 consecutive calendar months, not just the last 12 rows with data
+    full_range = pd.date_range(start=monthly_sales["Date"].min(),
+                                end=monthly_sales["Date"].max(), freq='MS')
+    monthly_sales = (
+        monthly_sales.set_index("Date")
+        .reindex(full_range, fill_value=0)
+        .rename_axis("Date")
+        .reset_index()
+    )
+    monthly_sales = monthly_sales.sort_values("Date").reset_index(drop=True)
+
+    monthly_sales["year"] = monthly_sales["Date"].dt.year
+    monthly_sales["month"] = monthly_sales["Date"].dt.month
+    monthly_sales["quarter"] = monthly_sales["Date"].dt.quarter
+
+    X = monthly_sales[["year", "month", "quarter"]]
+    y = monthly_sales["Total_Price_LKR"]
+
+    # Forecast the next 12 months (next year) starting the month after the last one in the data
+    last_month = monthly_sales["Date"].iloc[-1]
+    future_months = pd.date_range(start=last_month + pd.DateOffset(months=1), periods=12, freq='MS')
+
+    X_forecast = pd.DataFrame({
+        "year": future_months.year,
+        "month": future_months.month,
+        "quarter": future_months.quarter,
+    })
+
+    # cv can't exceed the number of monthly samples available — guards small uploads
+    safe_cv = max(2, min(5, len(monthly_sales)))
+
+    if is_uploaded:
+        reg = RandomForestRegressor(random_state=42)
+        param_grid = {
+            'n_estimators': [100, 200],
+            'max_depth': [None, 5, 10],
+            'min_samples_split': [2, 5],
+            'min_samples_leaf': [1, 2],
+            'max_features': ['sqrt', 'log2']
+        }
+        grid_search = GridSearchCV(
+            estimator=reg,
+            param_grid=param_grid,
+            cv=safe_cv,
+            scoring='neg_mean_squared_error',
+            n_jobs=-1,
+            verbose=0
+        )
+        grid_search.fit(X, y)
+        best_model = grid_search.best_estimator_
+    else:
+        # Pre-tuned hyperparameters for the demo dataset — skips the expensive grid search
+        best_model = RandomForestRegressor(
+            max_depth=6, max_features='sqrt', min_samples_leaf=1,
+            min_samples_split=2, n_estimators=200, random_state=42
+        )
+        best_model.fit(X, y)
+
+    y_pred = best_model.predict(X_forecast)
+    y_pred = np.clip(y_pred, a_min=0, a_max=None)  # revenue can't be negative
+
+    def _quarter_label(ts):
+        return f"Q{(ts.month - 1) // 3 + 1} {ts.year}"
+
+    def _year_range_label(dates):
+        # Rolling 12-month window label, e.g. "Sep 2025 – Aug 2026" — reflects the
+        # actual span of months covered, not a calendar year.
+        dates = pd.to_datetime(pd.Series(dates))
+        return f"{dates.min().strftime('%b %Y')} – {dates.max().strftime('%b %Y')}"
+
+    forecast_dataset = pd.DataFrame({
+        "Date": future_months,
+        "Sales": y_pred / 1_000_000  # Millions LKR
+    })
+    forecast_dataset["Quarter_Label"] = forecast_dataset["Date"].apply(_quarter_label)
+    forecast_dataset["Year_Label"] = _year_range_label(forecast_dataset["Date"])
+    forecast_dataset["Type"] = "Forecast"
+
+    # Previous year (last 12 months) of ACTUAL data, kept in the same shape so
+    # it can be charted right alongside the forecast for a clear before/after view
+    history_recent = monthly_sales.tail(12)[["Date", "Total_Price_LKR"]].copy()
+    history_recent = history_recent.rename(columns={"Total_Price_LKR": "Sales"})
+    history_recent["Sales"] = history_recent["Sales"] / 1_000_000  # Millions LKR
+    history_recent["Quarter_Label"] = history_recent["Date"].apply(_quarter_label)
+    history_recent["Year_Label"] = _year_range_label(history_recent["Date"])
+    history_recent["Type"] = "Actual (Previous Year)"
+
+    combined = pd.concat([history_recent, forecast_dataset], ignore_index=True)
+
+    peak_period = forecast_dataset.loc[forecast_dataset["Sales"].idxmax()]
+
+    forecast_summary_md = forecast_dataset[["Date", "Quarter_Label", "Sales"]].rename(
+        columns={"Quarter_Label": "Quarter", "Sales": "Forecasted_Revenue_M_LKR"}
+    ).assign(Date=lambda d: d["Date"].dt.strftime("%Y-%m")).to_markdown(index=False)
+
+    return history_recent, forecast_dataset, combined, forecast_summary_md, peak_period, best_model

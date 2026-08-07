@@ -5,7 +5,7 @@ import altair as alt
 import geopandas as gpd
 import matplotlib.pylab as plt
 import matplotlib.colors as mcolors
-from utils import get_raw_data, clean_data
+from utils import get_raw_data, clean_data, get_sales_forecast
 
 st.set_page_config(page_title="Sales Performance Analysis", page_icon="📈")
 
@@ -33,7 +33,9 @@ CHOROPLETH_CMAP = mcolors.LinearSegmentedColormap.from_list("nord_frost", CHOROP
 day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 # TABBED SECTIONS
-tab1, tab2, tab3, tab4 = st.tabs(["Revenue Trends", "Timing Patterns", "Top Products", "District Distribution"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(
+    ["Revenue Trends", "Forecast", "Timing Patterns", "Top Products", "District Distribution"]
+)
 
 # --- TAB 1: REVENUE TRENDS ---
 with tab1:
@@ -137,8 +139,143 @@ with tab1:
         use_container_width=True
     )
 
-# --- TAB 2: TIMING PATTERNS ---
+# --- TAB 2: FORECAST ---
 with tab2:
+    st.markdown("### Annual Sales Forecast")
+
+    NORD_ACTUAL = "#A3BE8C"     
+    NORD_FORECAST = COLOR_PRIMARY  
+
+    history_recent, forecast_dataset, combined, forecast_summary_md, peak_period, best_model = \
+        get_sales_forecast(df, is_uploaded)
+
+    st.caption(
+        f"Comparing the previous year (**{history_recent['Year_Label'].iloc[0]}**, actual) against "
+        f"the model's forecast for the **next year** "
+        f"(**{forecast_dataset['Year_Label'].iloc[0]}**). "
+        f"Projected peak month: **{peak_period['Date'].strftime('%b %Y')}** at **{peak_period['Sales']:.2f}M LKR**."
+    )
+    if is_uploaded:
+        st.caption(f"Model (tuned via grid search on your data): *{best_model}*")
+    else:
+        st.caption("Model: *RandomForestRegressor (pre-tuned for the demo dataset)*")
+
+    boundary_date = history_recent["Date"].max()
+
+    # Actual (previous year)
+    actual_area = (
+        alt.Chart(history_recent)
+        .mark_area(
+            interpolate='monotone', line=False,
+            color=alt.Gradient(
+                gradient='linear',
+                stops=[alt.GradientStop(color=NORD_ACTUAL, offset=0),
+                       alt.GradientStop(color='rgba(163,190,140,0)', offset=1)],
+                x1=1, x2=1, y1=1, y2=0,
+            ),
+        )
+        .encode(x=alt.X('Date:T', title='Month', axis=alt.Axis(format='%b %Y')),
+                y=alt.Y('Sales:Q', title='Revenue (M LKR)'))
+    )
+    actual_line = (
+        alt.Chart(history_recent)
+        .mark_line(interpolate='monotone', color=NORD_ACTUAL, strokeWidth=3)
+        .encode(x=alt.X('Date:T'), y=alt.Y('Sales:Q'))
+    )
+    actual_points = (
+        alt.Chart(history_recent)
+        .mark_point(filled=True, size=80, color=NORD_ACTUAL)
+        .encode(
+            x=alt.X('Date:T'), y=alt.Y('Sales:Q'),
+            tooltip=[alt.Tooltip('Date:T', title='Month', format='%b %Y'),
+                     alt.Tooltip('Quarter_Label:N', title='Quarter'),
+                     alt.Tooltip('Sales:Q', title='Actual Revenue (M LKR)', format=',.2f')],
+        )
+    )
+
+    # Forecast (next year)
+    forecast_area = (
+        alt.Chart(forecast_dataset)
+        .mark_area(
+            interpolate='monotone', line=False,
+            color=alt.Gradient(
+                gradient='linear',
+                stops=[alt.GradientStop(color=NORD_FORECAST, offset=0),
+                       alt.GradientStop(color='rgba(94,129,172,0)', offset=1)],
+                x1=1, x2=1, y1=1, y2=0,
+            ),
+        )
+        .encode(x=alt.X('Date:T'), y=alt.Y('Sales:Q'))
+    )
+    forecast_line = (
+        alt.Chart(forecast_dataset)
+        .mark_line(interpolate='monotone', color=NORD_FORECAST, strokeWidth=3, strokeDash=[6, 3])
+        .encode(x=alt.X('Date:T'), y=alt.Y('Sales:Q'))
+    )
+    forecast_points = (
+        alt.Chart(forecast_dataset)
+        .mark_point(filled=True, size=80, color=NORD_FORECAST)
+        .encode(
+            x=alt.X('Date:T'), y=alt.Y('Sales:Q'),
+            tooltip=[alt.Tooltip('Date:T', title='Month', format='%b %Y'),
+                     alt.Tooltip('Quarter_Label:N', title='Quarter'),
+                     alt.Tooltip('Sales:Q', title='Forecasted Revenue (M LKR)', format=',.2f')],
+        )
+    )
+
+    peak_forecast_label = (
+        alt.Chart(pd.DataFrame([peak_period]))
+        .mark_text(dy=-16, fontSize=12, fontWeight='bold', color='#ECEFF4')
+        .encode(x=alt.X('Date:T'), y=alt.Y('Sales:Q'), text=alt.Text('Sales:Q', format=',.2f'))
+    )
+
+    # Dashed vertical rule marking where actuals end and the forecast begins
+    boundary_rule = (
+        alt.Chart(pd.DataFrame({'Date': [boundary_date]}))
+        .mark_rule(strokeDash=[4, 4], color='#A9B4C4', strokeWidth=1.5)
+        .encode(x=alt.X('Date:T'))
+    )
+    
+    quarter_starts = (
+        forecast_dataset.groupby('Quarter_Label', sort=False)['Date'].min().reset_index()
+    )
+    quarter_dividers = (
+        alt.Chart(quarter_starts)
+        .mark_rule(strokeDash=[2, 3], color='#4C566A', strokeWidth=1)
+        .encode(x=alt.X('Date:T'))
+    )
+    quarter_labels = (
+        alt.Chart(quarter_starts)
+        .mark_text(dy=-160, fontSize=11, color='#A9B4C4', align='left', dx=4)
+        .encode(x=alt.X('Date:T'), text=alt.Text('Quarter_Label:N'))
+    )
+
+    st.altair_chart(
+        (actual_area + forecast_area + actual_line + forecast_line
+         + actual_points + forecast_points + boundary_rule
+         + quarter_dividers + quarter_labels + peak_forecast_label)
+        .properties(height=380)
+        .configure_view(strokeWidth=0)
+        .configure_axis(grid=True, gridOpacity=0.08),
+        use_container_width=True
+    )
+
+    lcol1, lcol2 = st.columns(2)
+    with lcol1:
+        st.markdown(
+            f"<span style='color:{NORD_ACTUAL};'>●</span>&nbsp; "
+            f"Actual — Previous Year ({history_recent['Year_Label'].iloc[0]})",
+            unsafe_allow_html=True
+        )
+    with lcol2:
+        st.markdown(
+            f"<span style='color:{NORD_FORECAST};'>●&#8212;</span>&nbsp; "
+            f"Forecast — Next Year ({forecast_dataset['Year_Label'].iloc[0]})",
+            unsafe_allow_html=True
+        )
+
+# --- TAB 3: TIMING PATTERNS ---
+with tab3:
     col3, col4 = st.columns(2, gap='large')
 
     with col3:
@@ -282,8 +419,8 @@ with tab2:
 
     st.altair_chart(heatmap, use_container_width=True)
 
-# --- TAB 3: TOP PRODUCTS ---
-with tab3:
+# --- TAB 4: TOP PRODUCTS ---
+with tab4:
     st.markdown("### Top 10 Products by Revenue")
     top_products = df.groupby('Description')['Total_Price_LKR'].sum().sort_values(ascending=False).head(10).reset_index()
     top_products['Total_Price_LKR'] = top_products['Total_Price_LKR'] / 1000000
@@ -360,8 +497,8 @@ with tab3:
         use_container_width=True
     )
 
-# --- TAB 4: DISTRICT DISTRIBUTION ---
-with tab4:
+# --- TAB 5: DISTRICT DISTRIBUTION ---
+with tab5:
     st.markdown("*This heat map and bar chart represent the districtwise distribution of total revenue.*")
 
     geo_data = gpd.read_file("https://raw.githubusercontent.com/dulnith-liyanage/RetailRadar/refs/heads/main/data/geodata/District_geo.json")
