@@ -4,13 +4,10 @@ import pandas as pd
 import plotly.express as px
 import altair as alt
 
-# ============================================================
-# NORD PALETTE — kept consistent with the rest of the dashboard
-# ============================================================
 NORD_SEQUENTIAL = ['#D8DEE9', '#B48EAD', '#BF616A', '#EBCB8B', '#A3BE8C', '#88C0D0', '#5E81AC']
-NORD_BG = "#2E3440"          # Polar Night — matches app background
-NORD_CARD_BG = "#3B4252"     # Polar Night (lighter) — card/container background
-NORD_TEXT_MUTED = "#A9B4C4"  # Snow Storm, dimmed
+NORD_BG = "#2E3440"          
+NORD_CARD_BG = "#3B4252"     
+NORD_TEXT_MUTED = "#A9B4C4"  
 NORD_FROST = "#88C0D0"
 NORD_FROST_DEEP = "#5E81AC"
 
@@ -25,11 +22,11 @@ st.caption("Customers are grouped using RFM (Recency, Frequency, Monetary) analy
 
 df = clean_data(raw_df)
 
-# --- RFM + K-Means Clustering (shared with Insight.AI via utils.get_segment_summary) ---
+# RFM + K-Means Clustering 
 customers, cluster_counts, segment_summary_md = get_segment_summary(df)
 
 
-# --- Segment icon helper — quick visual read on what kind of segment this is ---
+# Segment icon helper
 def segment_icon(segment_type: str) -> str:
     t = segment_type.lower()
     if any(k in t for k in ["champion", "vip", "legend"]):
@@ -59,9 +56,7 @@ CHURN_TIERS = ["Lapsing", "Lapsed"]
 
 unique_customer_count = customers["CustomerID"].nunique()
 
-# ============================================================
 # TABBED SECTIONS
-# ============================================================
 tab1, tab2, tab3, tab4 = st.tabs(["Segment Overview", "Top Customers", "Churning Customers", "Explore & Definitions"])
 
 # --- TAB 1: SEGMENT OVERVIEW ---

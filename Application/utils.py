@@ -3,7 +3,6 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 
-
 def get_raw_data():
     if "dataset" in st.session_state:
         return st.session_state["dataset"], True

@@ -20,28 +20,19 @@ st.sidebar.markdown(
 
 df = clean_data(raw_df)
 
-# ============================================================
-# COLOR PALETTE — Nord, used consistently across every chart
-# ============================================================
-COLOR_PRIMARY = "#5E81AC"        # Nord Frost (Blue) — revenue metrics
-COLOR_ACCENT = "#D08770"         # Nord Aurora (Orange) — timing / behavioral charts
-COLOR_TERTIARY = "#B48EAD"       # Nord Aurora (Purple) — secondary product metric
+COLOR_PRIMARY = "#5E81AC"        
+COLOR_ACCENT = "#D08770"         
+COLOR_TERTIARY = "#B48EAD"       
 
-# Nord pastel set for multi-category charts (donut, grouped bars)
-# Snow Storm, Purple, Red, Yellow, Green, Frost(Sky), Frost(Blue)
 COLOR_SEQUENTIAL = ['#D8DEE9', '#B48EAD', '#BF616A', '#EBCB8B', '#A3BE8C', '#88C0D0', '#5E81AC']
 
-# Sequential gradient for the district choropleth, derived from Nord's Frost/Polar Night
-# family — Snow Storm through Frost Blue down into Polar Night for the darkest values
 CHOROPLETH_SHADES = ['#ECEFF4', '#D8DEE9', '#C8D3E0', '#A9C2D4', '#8FBCBB',
                       '#81A1C1', '#5E81AC', '#4C6A92', '#3B4252']
 CHOROPLETH_CMAP = mcolors.LinearSegmentedColormap.from_list("nord_frost", CHOROPLETH_SHADES)
 
 day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
-# ============================================================
 # TABBED SECTIONS
-# ============================================================
 tab1, tab2, tab3, tab4 = st.tabs(["Revenue Trends", "Timing Patterns", "Top Products", "District Distribution"])
 
 # --- TAB 1: REVENUE TRENDS ---
@@ -373,7 +364,7 @@ with tab3:
 with tab4:
     st.markdown("*This heat map and bar chart represent the districtwise distribution of total revenue.*")
 
-    geo_data = gpd.read_file("../data/geodata/District_geo.json")
+    geo_data = gpd.read_file("https://raw.githubusercontent.com/dulnith-liyanage/RetailRadar/refs/heads/main/data/geodata/District_geo.json")
     geo_data = geo_data[['ADM2_EN', 'geometry']].rename(columns={'ADM2_EN': 'District'})
 
     dis_df = df.groupby('District')['Total_Price_LKR'].sum().sort_values(ascending=False).reset_index()

@@ -1,8 +1,5 @@
-#!.venv/bin/python
-
 import logging
 import os
-from functools import lru_cache
 import pandas as pd
 from groq import Groq
 from telegram import Update

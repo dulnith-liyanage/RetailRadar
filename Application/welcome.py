@@ -4,21 +4,16 @@ from utils import get_raw_data, clean_data
 
 st.set_page_config(page_title="Welcome", page_icon="🛍️")
 
-# =============
-# NORD PALETTE 
-# =============
-NORD_BG = "#2E3440"          # Polar Night — matches app background
-NORD_CARD_BG = "#3B4252"     # Polar Night (lighter) — card/container background
-NORD_TEXT_MUTED = "#A9B4C4"  # Snow Storm, dimmed
+NORD_BG = "#2E3440"          
+NORD_CARD_BG = "#3B4252"     
+NORD_TEXT_MUTED = "#A9B4C4"  
 NORD_FROST = "#88C0D0"
 NORD_FROST_DEEP = "#5E81AC"
 NORD_ORANGE = "#D08770"
 NORD_PURPLE = "#B48EAD"
 NORD_GREEN = "#A3BE8C"
 
-# ============================================================
-# BRANDING STRIP
-# ============================================================
+# BRANDING
 st.markdown(
     f"<p style='color:{NORD_TEXT_MUTED}; font-size:0.85rem; margin-bottom:0;'>"
     "DATA ODYSSEY 2026 &nbsp;·&nbsp; AI AND DATA SCIENCE CLUB &nbsp;·&nbsp; "
@@ -34,9 +29,7 @@ st.caption(
 
 st.sidebar.success("*Select a module to begin.*")
 
-# ============================================================
 # DATA SOURCE
-# ============================================================
 st.markdown("### Get Started")
 st.markdown(
     "Upload your own retail CSV below, or skip straight to the dashboard — "
@@ -52,7 +45,7 @@ if uploaded_file:
 
     st.success("Dataset successfully uploaded and saved to memory!")
 
-# --- Data Preview & Overview (reflects uploaded file, or demo data if none uploaded) ---
+# Data Preview & Overview
 raw_df, is_uploaded = get_raw_data()
 df = clean_data(raw_df)
 
@@ -77,9 +70,7 @@ with col3:
 
 st.divider()
 
-# ============================================================
 # EXPLORE THE DASHBOARD — clickable feature previews
-# ============================================================
 st.markdown("### Explore the Dashboard")
 
 fcol1, fcol2, fcol3 = st.columns(3)
