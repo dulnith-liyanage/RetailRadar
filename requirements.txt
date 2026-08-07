@@ -7,4 +7,4 @@ streamlit
 plotly
 groq
 tabulate
-scikit_learn
+scikit-learn
