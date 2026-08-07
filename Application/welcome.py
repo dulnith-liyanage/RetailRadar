@@ -112,12 +112,13 @@ with fcol3:
 st.divider()
 with st.container(border=True):
     st.markdown("### Who are Meridian?")
-    st.markdown("""We are a group of students at **University of Moratuwa batch 25** 
-passionate data science enthusiasts who came together 
-to tackle this competition with a shared vision of applying analytical thinking 
-to real-world problems. Through this project, we combined our diverse expertise to 
-design, implement, and refine solutions for reflect our commitment to innovation, 
-teamwork, and practical impact.""")
+    st.markdown("""We are a group of passionate data science 
+    enthusiasts from the University of Moratuwa, Batch 25, 
+    who came together to tackle this competition with a shared vision: 
+    applying analytical thinking to real-world problems. 
+    Through this project, we combined our diverse expertise to design, implement, 
+    and refine solutions that reflect our commitment to 
+    innovation, teamwork, and practical impact.""")
     contributors = [
     {
         "name": "Dulnith Liyanage",
