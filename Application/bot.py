@@ -23,13 +23,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-@st.cache_data
-def load_data():  # add load data function
-    df = pd.read_csv("../data/output/srilanka_retail_2020_2026_small.csv")
-    return df.head(100).to_string() 
-
-dataset_string = load_data()
-
 # DataFrame Integration
 raw_df, is_uploaded = get_raw_data()
 df = clean_data(raw_df)
