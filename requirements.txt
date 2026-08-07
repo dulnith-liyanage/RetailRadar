@@ -8,3 +8,4 @@ plotly
 groq
 tabulate
 scikit-learn
+python-telegram-bot
