@@ -23,7 +23,7 @@ st.markdown(
 
 st.write("# Welcome to Retail Radar")
 st.caption(
-    "AI-powered retail analytics for the Sri Lankan market — revenue trends, future predictions "
+    "AI-powered retail analytics for the Sri Lankan market — revenue trends, future predictions, "
     "regional performance, customer segmentation, and an in-app AI analyst, all in one dashboard."
 )
 
