@@ -115,7 +115,7 @@ with st.container(border=True):
     st.markdown("""We are a group of students at **University of Moratuwa batch 25** 
 passionate data science enthusiasts who came together 
 to tackle this competition with a shared vision of applying analytical thinking 
-to real-world problems.Through this project, we combined our diverse expertise to 
+to real-world problems. Through this project, we combined our diverse expertise to 
 design, implement, and refine solutions for reflect our commitment to innovation, 
 teamwork, and practical impact.""")
     contributors = [
