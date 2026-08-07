@@ -286,14 +286,10 @@ def get_sales_forecast(df, is_uploaded):
     df = df.copy()
     df["InvoiceDate"] = pd.to_datetime(df["InvoiceDate"])
 
-    # Aggregate to calendar MONTH (not day) — a quarterly-planning view needs
-    # monthly resolution, not daily noise
     df["InvoiceMonth"] = df["InvoiceDate"].dt.to_period("M").dt.to_timestamp()
     monthly_sales = df.groupby("InvoiceMonth")["Total_Price_LKR"].sum().reset_index()
     monthly_sales = monthly_sales.rename(columns={"InvoiceMonth": "Date"})
 
-    # Fill any gap months with 0 revenue so "previous year" means the actual
-    # last 12 consecutive calendar months, not just the last 12 rows with data
     full_range = pd.date_range(start=monthly_sales["Date"].min(),
                                 end=monthly_sales["Date"].max(), freq='MS')
     monthly_sales = (
@@ -321,7 +317,6 @@ def get_sales_forecast(df, is_uploaded):
         "quarter": future_months.quarter,
     })
 
-    # cv can't exceed the number of monthly samples available — guards small uploads
     safe_cv = max(2, min(5, len(monthly_sales)))
 
     if is_uploaded:
