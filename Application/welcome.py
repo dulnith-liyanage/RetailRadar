@@ -99,11 +99,29 @@ with fcol2:
 
 with fcol3:
     with st.container(border=True):
-        st.markdown(f"<span style='color:{NORD_ORANGE}; font-size:1.4rem;'>🤖</span>", unsafe_allow_html=True)
+        st.markdown(f"<span style='color:{NORD_ORANGE}; font-size:1.4rem;'>💡</span>", unsafe_allow_html=True)
         st.markdown("**Insight.AI**")
         st.markdown(
             f"<span style='color:{NORD_TEXT_MUTED};'>Ask questions in plain language and get answers "
             "grounded in the same data shown across the dashboard.</span>",
             unsafe_allow_html=True
         )
-        st.page_link("bot.py", label="Open Insight.AI", icon="🤖")
+        st.page_link("bot.py", label="Open Insight.AI", icon="💡")
+
+#Who are we...?
+
+st.divider()
+with st.container(border=True):
+    st.markdown("### Who are Meridian?")
+    st.image("https://images.unsplash.com/photo-1507525428034-b723cf961d3e")
+    st.markdown("""We are a group of students at **University of Moratuwa batch 25** 
+passionate data science enthusiasts who came together 
+to tackle this competition with a shared vision of applying analytical thinking 
+to real-world problems.Through this project, we combined our diverse expertise to 
+design, implement, and refine solutions for reflect our commitment to innovation, 
+teamwork, and practical impact.""")
+    st.markdown('**Contributors**')
+    st.markdown("* [Dulnith Liyanage](http://github.com/dulnith-liyanage/): Coordinator / EDA / Segmentations and visualizations ")
+    st.markdown("* [Thenul Sahansa](https://github.com/thenulSahansa/): Dashboard / Prediction algorithms")
+    st.markdown("* Dimuth Wickramasinghe: Chatbot / Telebot")
+    st.markdown("* Bihandu Liyanage: Data collection / Feature engineering")
