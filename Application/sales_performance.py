@@ -11,6 +11,8 @@ st.markdown("# Sales Performance Analysis")
 st.caption("Transactions are aggregated by year, seasonal timing patterns, product lines and districts to evaluate overall revenue performance.")
 
 raw_df, is_uploaded = get_raw_data()
+st.set_page_config(page_title="Sales Performance")
+
 # st.sidebar.markdown(
 #     "*Currently using uploaded file.*" if is_uploaded
 #     else "*Currently using the demo file. You can analyze your own files by uploading them in welcome page.*"

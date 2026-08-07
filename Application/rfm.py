@@ -12,6 +12,7 @@ NORD_FROST = "#88C0D0"
 NORD_FROST_DEEP = "#5E81AC"
 
 raw_df, is_uploaded = get_raw_data()
+st.set_page_config(page_title="Customer Segments")
 
 # st.sidebar.markdown(
 #     "*Currently using uploaded file.*" if is_uploaded

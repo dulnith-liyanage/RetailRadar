@@ -3,6 +3,8 @@ from groq import Groq
 from utils import get_raw_data, clean_data, get_segment_summary, get_sales_forecast
 import pandas as pd
 
+st.set_page_config(page_title="Insight.AI")
+
 # Initialize Groq Client
 client = Groq(api_key=st.secrets['API_KEY'])
 

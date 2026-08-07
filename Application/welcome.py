@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from utils import get_raw_data, clean_data
 
-st.set_page_config(page_title="Welcome", page_icon="🛍️")
+st.set_page_config(page_title="Welcome")
 
 NORD_BG = "#2E3440"          
 NORD_CARD_BG = "#3B4252"     
@@ -112,15 +112,41 @@ with fcol3:
 st.divider()
 with st.container(border=True):
     st.markdown("### Who are Meridian?")
-    st.image("https://images.unsplash.com/photo-1507525428034-b723cf961d3e")
     st.markdown("""We are a group of students at **University of Moratuwa batch 25** 
 passionate data science enthusiasts who came together 
 to tackle this competition with a shared vision of applying analytical thinking 
 to real-world problems.Through this project, we combined our diverse expertise to 
 design, implement, and refine solutions for reflect our commitment to innovation, 
 teamwork, and practical impact.""")
-    st.markdown('**Contributors**')
-    st.markdown("* [Dulnith Liyanage](http://github.com/dulnith-liyanage/): Coordinator / EDA / Segmentations and visualizations ")
-    st.markdown("* [Thenul Sahansa](https://github.com/thenulSahansa/): Dashboard / Prediction algorithms")
-    st.markdown("* [Dimuth Wickramasinghe](https://github.com/Dimuth-Wick): Chatbot / Telebot")
-    st.markdown("* Bihandu Liyanage: Data collection / Feature engineering")
+    contributors = [
+    {
+        "name": "Dulnith Liyanage",
+        "role": "Coordinator / EDA / Segmentations and visualizations",
+        "img": "https://media.licdn.com/dms/image/v2/D5603AQFWoeb_1wnusw/profile-displayphoto-crop_800_800/B56Z.nSKIoIoAI-/0/1785217983932?e=1787788800&v=beta&t=fsSpiCXTXxh-j-7wtKiG2GH9LQPC2IGS7MC6d9ftvnM",  # LinkedIn image URL
+        "lin": "https://www.linkedin.com/in/dulnithliyanage/"
+    },
+    {
+        "name": "Thenul Sahansa",
+        "role": "Dashboard / Prediction algorithms",
+        "img": "https://media.licdn.com/dms/image/v2/D4E03AQGg0Q8Rl9cutQ/profile-displayphoto-crop_800_800/B4EZozIW9TIQAI-/0/1761794423516?e=1787788800&v=beta&t=ZuRnq3QtE80gwz-zvxF2pR4ibJPE-Dt6-1qfwdADNn4",
+        "lin": "https://www.linkedin.com/in/thenulsahansa/"
+    },
+    {
+        "name": "Dimuth Wickramasinghe",
+        "role": "Chatbot / Telebot",
+        "img": "https://media.licdn.com/dms/image/v2/D4E03AQHqvqX185w7Sw/profile-displayphoto-crop_800_800/B4EZpEpOEQIUAI-/0/1762088262027?e=1787788800&v=beta&t=ltMB1kaKaeau-85bDzIxtZE3cfOi8bsyuuHCjRBSHhw",
+        "lin": "https://www.linkedin.com/in/dimuth-wickramasinghe-1a5765380/"
+    },
+    {
+        "name": "Bihandu Liyanage",
+        "role": "Data collection / Feature engineering",
+        "img": "https://tse3.mm.bing.net/th/id/OIP.IuRnbsXuvqX9BDNNGK1-IQHaHG?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+        "lin": "https://www.linkedin.com/in/bihandu-liyanage-775b24376/"
+    },
+]
+    for contributor in contributors:
+        col1, col2 = st.columns([1, 4])
+        with col1:
+            st.image(contributor["img"], width=60)
+        with col2:
+            st.markdown(f"**[{contributor['name']}]({contributor["lin"]})**  \n*{contributor['role']}*")
