@@ -7,8 +7,6 @@ import matplotlib.pylab as plt
 import matplotlib.colors as mcolors
 from utils import get_raw_data, clean_data, get_sales_forecast
 
-st.set_page_config(page_title="Sales Performance Analysis", page_icon="📈")
-
 st.markdown("# Sales Performance Analysis")
 st.caption("Transactions are aggregated by year, seasonal timing patterns, product lines and districts to evaluate overall revenue performance.")
 
@@ -235,7 +233,7 @@ with tab2:
         .mark_rule(strokeDash=[4, 4], color='#A9B4C4', strokeWidth=1.5)
         .encode(x=alt.X('Date:T'))
     )
-    
+
     quarter_starts = (
         forecast_dataset.groupby('Quarter_Label', sort=False)['Date'].min().reset_index()
     )
