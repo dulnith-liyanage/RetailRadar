@@ -8,7 +8,7 @@ import matplotlib.colors as mcolors
 from utils import get_raw_data, clean_data, get_sales_forecast
 
 st.markdown("# Sales Performance Analysis")
-st.caption("Transactions are aggregated by year, seasonal timing patterns, product lines and districts to evaluate overall revenue performance.")
+st.caption("Transactions are aggregated by year, seasonal timing patterns, product lines and districts to evaluate overall revenue performance. Future predictions are generated using a Random Forest Regressor model")
 
 raw_df, is_uploaded = get_raw_data()
 st.set_page_config(page_title="Sales Performance")
