@@ -12,10 +12,11 @@ NORD_FROST = "#88C0D0"
 NORD_FROST_DEEP = "#5E81AC"
 
 raw_df, is_uploaded = get_raw_data()
-st.sidebar.markdown(
-    "*Currently using uploaded file.*" if is_uploaded
-    else "*Currently using the demo file. You can analyze your own files by uploading them in welcome page.*"
-)
+
+# st.sidebar.markdown(
+#     "*Currently using uploaded file.*" if is_uploaded
+#     else "*Currently using the demo file. You can analyze your own files by uploading them in welcome page.*"
+# )
 
 st.markdown("# Customer Segmentation")
 st.caption("Customers are grouped using RFM (Recency, Frequency, Monetary) analysis and K-Means clustering into behavioral segments.")

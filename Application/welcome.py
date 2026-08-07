@@ -27,8 +27,7 @@ st.caption(
     "regional performance, customer segmentation, and an in-app AI analyst, all in one dashboard."
 )
 
-st.sidebar.success("*Select a module to begin.*")
-
+# st.sidebar.success("*Select a module to begin.*")
 # DATA SOURCE
 st.markdown("### Get Started")
 st.markdown(
@@ -123,5 +122,5 @@ teamwork, and practical impact.""")
     st.markdown('**Contributors**')
     st.markdown("* [Dulnith Liyanage](http://github.com/dulnith-liyanage/): Coordinator / EDA / Segmentations and visualizations ")
     st.markdown("* [Thenul Sahansa](https://github.com/thenulSahansa/): Dashboard / Prediction algorithms")
-    st.markdown("* Dimuth Wickramasinghe: Chatbot / Telebot")
+    st.markdown("* [Dimuth Wickramasinghe](https://github.com/Dimuth-Wick): Chatbot / Telebot")
     st.markdown("* Bihandu Liyanage: Data collection / Feature engineering")
