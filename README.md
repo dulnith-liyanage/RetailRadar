@@ -2,7 +2,7 @@
 
 **AI-powered retail analytics dashboard for the Sri Lankan retail sector.**
 
-Retail Radar turns raw retail transaction data into revenue trends, regional performance maps, AI-driven customer segmentation, and an in-app conversational analyst — all in a single multi-page Streamlit app.
+Retail Radar turns raw retail transaction data into revenue trends, district-wise performance maps, AI-driven customer segmentation, sales forecasting, and an in-app conversational analyst — all in a single multi-page Streamlit dashboard.
 
 Built for **Data Odyssey 2026**, AI and Data Science Club, General Sir John Kotelawala Defence University.
 
@@ -13,10 +13,10 @@ Built for **Data Odyssey 2026**, AI and Data Science Club, General Sir John Kote
 | Page | What it does |
 |---|---|
 | **Welcome** | Landing page; lets you upload your own retail CSV or use the built-in demo dataset |
-| **Sales Performance** 📈 | Revenue by year, month, and year-over-year comparison; weekly and hourly revenue trends; top 10 products by revenue and by quantity sold |
+| **Sales Performance** 📈 | Revenue by year, month, week, and hour; year-over-year and month-over-month comparisons; revenue heatmaps; top products by revenue and quantity; annual sales forecast |
 | **Districtwise Distribution** 📌 | Choropleth map of revenue by Sri Lankan district, paired with a ranked bar chart |
-| **Customer Segments** 👥 | RFM (Recency, Frequency, Monetary) analysis with K-Means clustering to automatically group customers into behavioral segments (e.g. Champions, At-Risk VIPs, Lost Accounts); top 10 customers by spend; full segment definition table |
-| **Insight.AI** 🤖 | A chatbot grounded in the dashboard's own statistics (descriptive stats, correlation matrix, revenue breakdowns) that answers business questions in plain language, powered by Groq |
+| **Customer Segments** 👥 | RFM (Recency, Frequency, Monetary) analysis with K-Means clustering to automatically group customers into behavioral segments, including spend-based insights and segment definitions |
+| **Insight.AI** 🤖 | A chatbot grounded in the dashboard's own statistics, correlation matrix, product performance, customer segments, and sales forecast, powered by Groq |
 
 ---
 
@@ -24,9 +24,9 @@ Built for **Data Odyssey 2026**, AI and Data Science Club, General Sir John Kote
 
 - **Framework:** [Streamlit](https://streamlit.io/) (multi-page app via `st.navigation`)
 - **Data processing:** pandas
-- **Visualization:** Plotly Express, Altair, `st.bar_chart` / `st.line_chart`, Matplotlib (choropleth)
+- **Visualization:** Plotly Express, Altair, `st.bar_chart` / `st.line_chart`, Matplotlib
 - **Geospatial:** GeoPandas
-- **Machine learning:** scikit-learn (`StandardScaler`, `KMeans`)
+- **Machine learning:** scikit-learn (`StandardScaler`, `KMeans`, forecasting model)
 - **LLM chatbot:** [Groq](https://groq.com/) API (`llama-3.3-70b-versatile`)
 
 ---
@@ -35,20 +35,24 @@ Built for **Data Odyssey 2026**, AI and Data Science Club, General Sir John Kote
 
 ```
 Application/
-├── dashboard.py              # Entry point — defines app navigation across all pages
-├── welcome.py                 # Landing page / file upload
-├── sales_performance.py       # Revenue trend charts
-├── district_distribution.py   # Choropleth + district revenue ranking
-├── rfm.py                     # RFM analysis, K-Means clustering, customer segments
-├── bot.py                     # Insight.AI chatbot (Groq-powered)
-└── utils.py                   # Shared data loading & cleaning functions
+├── dashboard.py              # Entry point — defines app navigation across pages
+├── welcome.py                # Landing page / file upload
+├── sales_performance.py      # Revenue trends, charts, and forecast
+├── district_distribution.py  # Choropleth + district revenue ranking
+├── rfm.py                    # RFM analysis, K-Means clustering, customer segments
+├── bot.py                    # Insight.AI chatbot (Groq-powered)
+├── TelegramBot.py            # Telegram chatbot integration
+└── utils.py                   # Shared data loading, cleaning, segmentation, and forecasting functions
 
 data/
+├── datasets/
+│   ├── sri_lanka_1.csv       # Sample retail dataset
+│   └── sri_lanka_2.csv       # Sample retail dataset
 ├── output/
 │   ├── srilanka_retail_2020_2026.csv         # Full demo dataset
 │   └── srilanka_retail_2020_2026_small.csv   # Sampled dataset (used as chatbot context)
 └── geodata/
-    └── District_geo.json      # Sri Lanka district boundaries (GeoJSON)
+    └── District_geo.json     # Sri Lanka district boundaries (GeoJSON)
 ```
 
 ---
@@ -58,6 +62,7 @@ data/
 ### Prerequisites
 - Python 3.9+
 - A [Groq API key](https://console.groq.com/) for the Insight.AI chatbot
+- A Telegram bot token if you plan to use the Telegram chatbot
 
 ### Installation
 
@@ -87,6 +92,12 @@ Insight.AI requires a Groq API key. Create `Application/.streamlit/secrets.toml`
 API_KEY = "your-groq-api-key-here"
 ```
 
+If you are using the Telegram bot, also add your bot token:
+
+```toml
+TELE_BOT_API = "your-telegram-bot-token-here"
+```
+
 ### Data
 
 Expected columns in the retail dataset include (at minimum):
@@ -107,14 +118,15 @@ The app will open in your browser, defaulting to the **Welcome** page. From the 
 
 1. **Upload or use demo data** — `utils.get_raw_data()` checks session state for an uploaded file, falling back to the bundled demo CSV.
 2. **Clean & process** — `utils.clean_data()` drops missing customer IDs, filters invalid quantities/prices, and derives Year, Month, Day, and Hour fields from the invoice date.
-3. **Visualize** — Each page aggregates the cleaned data into the metrics and charts relevant to it (revenue trends, district totals, RFM scores).
-4. **Segment customers** — `rfm.py` computes Recency, Frequency, and Monetary scores per customer, scales them, and runs K-Means (6 clusters) to assign each customer to a named behavioral segment.
-5. **Ask Insight.AI** — `bot.py` pre-computes summary statistics and feeds them into a system prompt for the Groq LLM, so the chatbot's answers are grounded in the same numbers shown elsewhere in the app.
+3. **Visualize** — Each page aggregates the cleaned data into the metrics and charts relevant to it, including revenue trends, district totals, product performance, and forecast charts.
+4. **Segment customers** — `rfm.py` computes Recency, Frequency, and Monetary scores per customer, scales them, and runs K-Means clustering to assign each customer to a named behavioral segment.
+5. **Forecast sales** — `utils.get_sales_forecast()` trains a monthly forecast model and shares the next 12 months of projected revenue across the dashboard and chatbot.
+6. **Ask Insight.AI** — `bot.py` pre-computes summary statistics and feeds them into a system prompt for the Groq LLM, so the chatbot's answers are grounded in the same numbers shown elsewhere in the app.
 
 ---
 
 ## Competition Context
 
-This project was developed for **Data Odyssey 2026**, organized by the AI and Data Science Club at General Sir John Kotelawala Defence University, under the theme *"Humanity x AI: The New Age of Innovation."*
+This project was developed for **Data Odyssey 2026**, organized by the AI and Data Science Club at General Sir John Kotelawala Defence University, under the theme *"Humanity x AI: The New Age of Innovation"*.
 
 ---
