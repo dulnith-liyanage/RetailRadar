@@ -1,0 +1,9 @@
+CustomerID,InvoiceNo,InvoiceDate,Description,Quantity,UnitPrice,Total_Price_LKR,District
+C5001,INV9001,2026-05-15 09:00:00,Lanka Soy Chicken Flavour 90g,10,120.00,1200.00,Matara
+C5002,INV9002,2026-05-15 12:15:00,MD Mango Chutney 400g,2,650.00,1300.00,Hambantota
+C5003,INV9003,2026-05-16 10:30:00,Dilmah Green Tea 20 Bags,3,550.00,1650.00,Jaffna
+C5004,INV9004,2026-05-16 13:45:00,Wijaya Roasted Curry Powder 250g,2,400.00,800.00,Mannar
+C5005,INV9005,2026-05-17 15:20:00,Wijaya Chilli Powder 250g,2,450.00,900.00,Vavuniya
+C5006,INV9006,2026-05-17 16:10:00,Harischandra Coffee 100g,1,380.00,380.00,Trincomalee
+C5007,INV9007,2026-05-18 11:05:00,Bairaha Chicken 1kg,2,1450.00,2900.00,Batticaloa
+C5008,INV9008,2026-05-18 14:40:00,Prima Stella Noodles 400g,5,280.00,1400.00,Matara

@@ -1,0 +1,10 @@
+CustomerID,InvoiceNo,InvoiceDate,Description,Quantity,UnitPrice,Total_Price_LKR,District
+C6001,INV10001,2026-06-20 10:00:00,Pears Baby Powder 100g,3,250.00,750.00,Ampara
+C6002,INV10002,2026-06-20 11:30:00,Lifebuoy Soap 100g,10,130.00,1300.00,Polonnaruwa
+C6003,INV10003,2026-06-21 09:15:00,Sunsilk Black Shampoo 200ml,2,550.00,1100.00,Anuradhapura
+C6004,INV10004,2026-06-21 14:45:00,Vim Dishwash Liquid 500ml,1,450.00,450.00,Kurunegala
+C6005,INV10005,2026-06-22 16:20:00,Diva Washing Powder 1kg,2,650.00,1300.00,Puttalam
+C6006,INV10006,2026-06-22 17:10:00,Surf Excel 1kg,1,850.00,850.00,Kegalle
+C6007,INV10007,2026-06-23 10:05:00,Sunlight Soap 115g,12,120.00,1440.00,Ratnapura
+C6008,INV10008,2026-06-23 12:40:00,Velvet Beauty Soap 100g,5,150.00,750.00,Badulla
+C6009,INV10009,2026-06-24 08:50:00,Lifebuoy Soap 100g,5,130.00,650.00,Monaragala

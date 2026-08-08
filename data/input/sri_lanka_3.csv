@@ -1,0 +1,11 @@
+CustomerID,InvoiceNo,InvoiceDate,Description,Quantity,UnitPrice,Total_Price_LKR,District
+C3001,INV7001,2026-03-01 09:00:00,Munchee Chocolate Biscuit 200g,4,220.00,880.00,Hambantota
+C3002,INV7002,2026-03-01 12:15:00,Maliban Lemon Puff 200g,6,200.00,1200.00,Monaragala
+C3003,INV7003,2026-03-02 10:30:00,Marina Coconut Oil 1L,2,950.00,1900.00,Nuwara Eliya
+C3004,INV7004,2026-03-02 13:45:00,Kotmale Fresh Milk 1L,3,450.00,1350.00,Mannar
+C3005,INV7005,2026-03-03 15:20:00,Happy Cow Cheese 120g,2,850.00,1700.00,Vavuniya
+C3006,INV7006,2026-03-03 16:10:00,Astra Margarine 250g,1,400.00,400.00,Mullaitivu
+C3001,INV7007,2026-03-04 11:05:00,Marmite 100g,2,750.00,1500.00,Hambantota
+C3007,INV7008,2026-03-04 14:40:00,Panadol 100 Tablets,1,450.00,450.00,Kilinochchi
+C3008,INV7009,2026-03-05 09:50:00,Signal Toothpaste 120g,3,230.00,690.00,Monaragala
+C3009,INV7010,2026-03-05 12:25:00,Munchee Chocolate Biscuit 200g,5,220.00,1100.00,Nuwara Eliya
