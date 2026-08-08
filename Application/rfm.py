@@ -80,7 +80,7 @@ with tab1:
         hole=0.65,  # Turns the pie chart into a donut
         color_discrete_sequence=NORD_SEQUENTIAL,
     )
-
+ 
     # Style the central hole text, gaps between slices, and the horizontal legend
     pfig.update_layout(
         annotations=[
