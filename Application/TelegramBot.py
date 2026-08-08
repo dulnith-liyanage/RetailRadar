@@ -27,7 +27,8 @@ client = Groq(api_key=GROQ_API_KEY)
 
 raw_df, _ = get_raw_data()
 df = clean_data(raw_df)
-dataset_string = df.head(100).to_string()
+
+dataset_string = df.head(5).to_string()
 
 describe = df.describe().to_markdown(index=True)
 correlation = df.corr(numeric_only=True).to_markdown(index=True)
@@ -47,11 +48,11 @@ districtwise_data_md = districtwise_data.to_markdown(index=False)
 
 product_revenue = df.groupby("Description")["Total_Price_LKR"].sum().sort_values(ascending=False).reset_index()
 product_revenue["Total_Price_LKR"] = product_revenue["Total_Price_LKR"] / 1000000
-top_products_by_revenue_md = product_revenue.head(15).to_markdown(index=False)
-bottom_products_by_revenue_md = product_revenue.tail(10).sort_values("Total_Price_LKR").to_markdown(index=False)
+top_products_by_revenue_md = product_revenue.head(10).to_markdown(index=False)
+bottom_products_by_revenue_md = product_revenue.tail(5).sort_values("Total_Price_LKR").to_markdown(index=False)
 
 product_quantity = df.groupby("Description")["Quantity"].sum().sort_values(ascending=False).reset_index()
-top_products_by_quantity_md = product_quantity.head(15).to_markdown(index=False)
+top_products_by_quantity_md = product_quantity.head(10).to_markdown(index=False)
 
 day_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 weekly_sales = df.groupby("Day")["Total_Price_LKR"].sum().reset_index()
@@ -152,12 +153,15 @@ relevant table yourself and identify the single row with the correct max or min 
 State only that final answer as your opening sentence, with its exact figure. Keep answers to
 1-3 sentences unless the user asks for more detail or a breakdown."""
 
+SYSTEM_PROMPT = build_system_prompt()
+logging.info("System prompt built (%d chars, ~%d tokens)", len(SYSTEM_PROMPT), len(SYSTEM_PROMPT) // 4)
+
 
 def generate_reply(prompt: str) -> str:
     response = client.chat.completions.create(
         model=MODEL_NAME,
         messages=[
-            {"role": "system", "content": build_system_prompt()},
+            {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": prompt},
         ],
     )
