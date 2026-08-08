@@ -150,4 +150,4 @@ with st.container(border=True):
         with col1:
             st.image(contributor["img"], width=60)
         with col2:
-            st.markdown(f"**[{contributor['name']}]({contributor["lin"]})**  \n*{contributor['role']}*")
+            st.markdown(f"**[{contributor['name']}]({contributor['lin']})**  \n*{contributor['role']}*")
