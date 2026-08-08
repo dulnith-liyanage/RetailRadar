@@ -6,6 +6,7 @@ from sklearn.cluster import KMeans
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestRegressor
 
+
 def get_raw_data():
     if "dataset" in st.session_state:
         return st.session_state["dataset"], True
@@ -237,6 +238,16 @@ def get_segment_summary(df):
     profile['Type'] = profile['Label'].apply(
         lambda x: CUSTOMER_SEGMENTS.get(x, {}).get("name", f"Custom Segment ({x})")
     )
+
+    dup_sizes = profile.groupby('Type')['Type'].transform('size')
+    if (dup_sizes > 1).any():
+        rank_in_group = profile.groupby('Type')['Monetary'].rank(method='first', ascending=False).astype(int)
+        spend_suffix = rank_in_group.map({1: "Higher Spend", 2: "Lower Spend"}).fillna(
+            "Tier " + rank_in_group.astype(str)
+        )
+        profile['Type'] = profile['Type'].where(
+            dup_sizes == 1, profile['Type'] + " (" + spend_suffix + ")"
+        )
 
     customers = profile.merge(rfm[['Cluster', 'CustomerID']], on='Cluster', how='left')
     customers = customers[["CustomerID", "Cluster", "Label", "Type"]]
