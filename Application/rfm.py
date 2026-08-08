@@ -65,11 +65,19 @@ tab1, tab2, tab3, tab4 = st.tabs(["Segment Overview", "Top Customers", "Churning
 with tab1:
     st.markdown("### Segment Composition")
 
+    pie_data = cluster_counts.sort_values("Count", ascending=False).copy()
+    pie_data["Pct"] = pie_data["Count"] / pie_data["Count"].sum() * 100
+    pie_data["Legend_Label"] = (
+        pie_data["Type_Display"] + " (" + pie_data["Count"].astype(str) + ")"
+    )
+    SMALL_SLICE_THRESHOLD = 8  # % share below which a slice gets pulled out
+    pie_data["Pull"] = pie_data["Pct"].apply(lambda p: 0.09 if p < SMALL_SLICE_THRESHOLD else 0)
+
     pfig = px.pie(
-        cluster_counts,
-        names="Type_Display",
+        pie_data,
+        names="Legend_Label",
         values="Count",
-        hole=0.7,  # Turns the pie chart into a donut
+        hole=0.65,  # Turns the pie chart into a donut
         color_discrete_sequence=NORD_SEQUENTIAL,
     )
 
@@ -82,22 +90,28 @@ with tab1:
         legend=dict(
             orientation="h",
             yanchor="bottom",
-            y=-0.25,
+            y=-0.3,
             xanchor="center",
             x=0.5,
             title=None,
+            font=dict(size=12),
         ),
         showlegend=True,
-        margin=dict(t=20, b=20, l=20, r=20),
+        margin=dict(t=20, b=60, l=60, r=60),
     )
 
     pfig.update_traces(
-        textinfo="none",
-        marker=dict(line=dict(color=NORD_BG, width=4)),
-        hovertemplate="%{label}<br>%{value} customers (%{percent})<extra></extra>",
+        pull=pie_data["Pull"].tolist(),
+        textinfo="percent",
+        textposition="outside",
+        texttemplate="%{percent:.1%}",
+        textfont=dict(size=12, color="#D8DEE9"),
+        marker=dict(line=dict(color=NORD_BG, width=3)),
+        hovertemplate="%{label}<br>%{percent}<extra></extra>",
     )
 
     st.plotly_chart(pfig, use_container_width=True)
+    st.caption("Small segments are pulled outward from the ring so they stay visible even at a low share of customers.")
 
     st.markdown("### Segment Landscape")
     st.caption("Bubble size = number of customers in the segment · position shows how large vs. how valuable each segment is.")
@@ -121,7 +135,9 @@ with tab1:
         xaxis=dict(gridcolor="rgba(236,239,244,0.08)"),
         yaxis=dict(gridcolor="rgba(236,239,244,0.08)"),
     )
-    landscape.update_traces(marker=dict(line=dict(color=NORD_BG, width=1.5)))
+    # sizemin guarantees even the smallest segment renders as a visible bubble,
+    # not just a near-invisible dot
+    landscape.update_traces(marker=dict(line=dict(color=NORD_BG, width=1.5), sizemin=8))
 
     st.plotly_chart(landscape, use_container_width=True)
 
