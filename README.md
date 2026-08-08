@@ -48,9 +48,8 @@ data/
 ├── datasets/
 │   ├── sri_lanka_1.csv       # Sample retail dataset
 │   └── sri_lanka_2.csv       # Sample retail dataset
-├── output/
-│   ├── srilanka_retail_2020_2026.csv         # Full demo dataset
-│   └── srilanka_retail_2020_2026_small.csv   # Sampled dataset (used as chatbot context)
+|   └── sri_lanka_large_1.csv    # Sample retail dataset
+|   └── sri_lanka_large_2.csv    # Sample retail dataset
 └── geodata/
     └── District_geo.json     # Sri Lanka district boundaries (GeoJSON)
 ```
