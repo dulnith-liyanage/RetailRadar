@@ -10,7 +10,7 @@ from sklearn.ensemble import RandomForestRegressor
 def get_raw_data():
     if "dataset" in st.session_state:
         return st.session_state["dataset"], True
-    return pd.read_csv("https://raw.githubusercontent.com/dulnith-liyanage/RetailRadar/refs/heads/main/data/datasets/srilanka_retail_2020_2026_small.csv"), False
+    return pd.read_csv("https://raw.githubusercontent.com/dulnith-liyanage/RetailRadar/refs/heads/main/data/datasets/sri_lanka_1.csv"), False
 
 
 @st.cache_data
