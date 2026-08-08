@@ -1,0 +1,12 @@
+CustomerID,InvoiceNo,InvoiceDate,Description,Quantity,UnitPrice,Total_Price_LKR,District
+C2001,INV6001,2026-02-01 10:00:00,Kist Tomato Ketchup 400g,2,450.00,900.00,Badulla
+C2002,INV6002,2026-02-01 11:30:00,Prima Kottu Mee Cup,5,150.00,750.00,Ratnapura
+C2003,INV6003,2026-02-02 09:15:00,Zesta Tea 400g,1,1050.00,1050.00,Kegalle
+C2004,INV6004,2026-02-02 14:45:00,CBL Samaposha 200g,4,180.00,720.00,Puttalam
+C2005,INV6005,2026-02-03 16:20:00,Harischandra Noodles 400g,3,250.00,750.00,Polonnaruwa
+C2006,INV6006,2026-02-03 17:10:00,Maggi Coconut Milk Powder 300g,2,750.00,1500.00,Batticaloa
+C2001,INV6007,2026-02-04 10:05:00,Motha Strawberry Jelly 100g,10,120.00,1200.00,Badulla
+C2007,INV6008,2026-02-04 12:40:00,Clogard Toothpaste 120g,3,220.00,660.00,Ampara
+C2008,INV6009,2026-02-05 08:50:00,Baby Cheramy Soap 90g,5,140.00,700.00,Ratnapura
+C2009,INV6010,2026-02-05 11:25:00,Zesta Tea 400g,2,1050.00,2100.00,Kegalle
+C2010,INV6011,2026-02-06 15:50:00,Kist Tomato Ketchup 400g,1,450.00,450.00,Puttalam
