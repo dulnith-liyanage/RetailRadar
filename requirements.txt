@@ -1,7 +1,6 @@
 pandas
 numpy
 geopandas
-yfinance
 matplotlib
 streamlit
 plotly
