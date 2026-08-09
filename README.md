@@ -14,7 +14,6 @@ Built for **Data Odyssey 2026**, AI and Data Science Club, General Sir John Kote
 |---|---|
 | **Welcome** | Landing page; lets you upload your own retail CSV or use the built-in demo dataset |
 | **Sales Performance** 📈 | Revenue by year, month, week, and hour; year-over-year and month-over-month comparisons; revenue heatmaps; top products by revenue and quantity; annual sales forecast |
-| **Districtwise Distribution** 📌 | Choropleth map of revenue by Sri Lankan district, paired with a ranked bar chart |
 | **Customer Segments** 👥 | RFM (Recency, Frequency, Monetary) analysis with K-Means clustering to automatically group customers into behavioral segments, including spend-based insights and segment definitions |
 | **Insight.AI** 🤖 | A chatbot grounded in the dashboard's own statistics, correlation matrix, product performance, customer segments, and sales forecast, powered by Groq |
 
