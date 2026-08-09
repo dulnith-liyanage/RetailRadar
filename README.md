@@ -27,6 +27,7 @@ Built for **Data Odyssey 2026**, AI and Data Science Club, General Sir John Kote
 - **Geospatial:** GeoPandas
 - **Machine learning:** scikit-learn (`StandardScaler`, `KMeans`, forecasting model)
 - **LLM chatbot:** [Groq](https://groq.com/) API (`llama-3.3-70b-versatile`)
+- **Telegram bot:** `python-telegram-bot`, lets users chat with Insight.AI directly from Telegram using the same Groq-powered backend
 
 ---
 
@@ -112,6 +113,17 @@ streamlit run dashboard.py
 
 The app will open in your browser, defaulting to the **Welcome** page. From the sidebar, upload your own CSV or continue with the demo dataset — every other page (Sales Performance, Districtwise Distribution, Customer Segments, Insight.AI) will automatically reflect whichever dataset is active.
 
+## Run the Telegram Bot
+
+Make sure `TELE_BOT_API` is set in `Application/.streamlit/secrets.toml` (see Configuration above), then:
+
+```bash
+cd Application
+python telegram_bot.py
+```
+
+Once running, message your bot on Telegram to query the same stats, correlations, and forecasts available through Insight.AI on the dashboard.
+
 ---
 
 ## How It Works
@@ -122,6 +134,7 @@ The app will open in your browser, defaulting to the **Welcome** page. From the 
 4. **Segment customers** — `rfm.py` computes Recency, Frequency, and Monetary scores per customer, scales them, and runs K-Means clustering to assign each customer to a named behavioral segment.
 5. **Forecast sales** — `utils.get_sales_forecast()` trains a monthly forecast model and shares the next 12 months of projected revenue across the dashboard and chatbot.
 6. **Ask Insight.AI** — `bot.py` pre-computes summary statistics and feeds them into a system prompt for the Groq LLM, so the chatbot's answers are grounded in the same numbers shown elsewhere in the app.
+7. **Chat via Telegram** — `telegram_bot.py` connects to the same `bot.py` logic as Insight.AI, so questions asked on Telegram get answered using the identical pre-computed stats and system prompt as the dashboard chatbot.
 
 ---
 
