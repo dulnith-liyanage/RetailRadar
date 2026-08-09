@@ -113,7 +113,7 @@ streamlit run dashboard.py
 
 The app will open in your browser, defaulting to the **Welcome** page. From the sidebar, upload your own CSV or continue with the demo dataset — every other page (Sales Performance, Districtwise Distribution, Customer Segments, Insight.AI) will automatically reflect whichever dataset is active.
 
-## Run the Telegram Bot
+### Run the Telegram Bot
 
 Make sure `TELE_BOT_API` is set in `Application/.streamlit/secrets.toml` (see Configuration above), then:
 
