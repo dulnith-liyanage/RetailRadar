@@ -73,14 +73,16 @@ pip install -r requirements.txt
 
 **Key dependencies** (add to `requirements.txt` if not already present):
 ```
-streamlit
 pandas
-plotly
-altair
+numpy
 geopandas
 matplotlib
-scikit-learn
+streamlit
+plotly
 groq
+tabulate
+scikit-learn
+python-telegram-bot
 ```
 
 ### Configuration
