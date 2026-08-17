@@ -67,7 +67,7 @@ hourly_sales = df.groupby("Hour")["Total_Price_LKR"].sum().reset_index()
 hourly_sales["Total_Price_LKR"] = hourly_sales["Total_Price_LKR"] / 1000000
 hourly_sales_md = hourly_sales.to_markdown(index=False)
 
-customers, _, segment_summary_md = get_segment_summary(df)
+customers, cluster_counts, segment_summary_md, _ = get_segment_summary(df)
 total_customers = customers["CustomerID"].nunique()
 
 # --- Sales Forecast (shared with the Streamlit app's Forecast tab and bot.py) ---
@@ -82,93 +82,78 @@ forecast_prev_year_label = history_recent["Year_Label"].iloc[0]
 forecast_year_label = forecast_dataset["Year_Label"].iloc[0]
 
 
+def get_revenue_data():
+    return f"[YEARLY REVENUE]\n{year_data_md}\n[MONTHLY REVENUE]\n{monthly_revenue_md}\n[DISTRICT REVENUE]\n{districtwise_data_md}"
+
+def get_product_data():
+    return f"[TOP PRODUCTS BY REVENUE]\n{top_products_by_revenue_md}\n[TOP PRODUCTS BY QUANTITY]\n{top_products_by_quantity_md}\n[BOTTOM PRODUCTS]\n{bottom_products_by_revenue_md}"
+
+def get_segment_data():
+    return f"[CUSTOMER SEGMENTS]\n{segment_summary_md}"
+
+def get_forecast_data():
+    return f"[SALES FORECAST]\n{forecast_summary_md}"
+
+def get_timing_data():
+    return f"[WEEKLY SALES]\n{weekly_sales_md}\n[HOURLY SALES]\n{hourly_sales_md}"
+
+available_tools = {
+    "get_revenue_data": get_revenue_data,
+    "get_product_data": get_product_data,
+    "get_segment_data": get_segment_data,
+    "get_forecast_data": get_forecast_data,
+    "get_timing_data": get_timing_data,
+}
+
+tools = [
+    {"type": "function", "function": {"name": "get_revenue_data", "description": "Get yearly, monthly, and district revenue."}},
+    {"type": "function", "function": {"name": "get_product_data", "description": "Get top and bottom performing products."}},
+    {"type": "function", "function": {"name": "get_segment_data", "description": "Get customer segments, RFM, and K-Means data."}},
+    {"type": "function", "function": {"name": "get_forecast_data", "description": "Get the next 12 months sales forecast."}},
+    {"type": "function", "function": {"name": "get_timing_data", "description": "Get revenue trends by day of week and hour of day."}}
+]
+
 def build_system_prompt() -> str:
-    return f"""You are 'Insight.AI', the specialized chatbot for 'Retail Radar' analytical platform.
-Your job is to deliver concise data insights based on the matrices provided below.
-All revenue metrics are customized for Sri Lankan Rupees (LKR).
-
-[DATASET SAMPLE]:
-{dataset_string}
-
-[DESCRIPTIVE STATISTICS]:
-{describe}
-
-[CORRELATION MATRIX]:
-{correlation}
-
-[YEARLY REVENUE (In Millions LKR)]:
-{year_data_md}
-
-[MONTHLY REVENUE BREAKDOWN (In Millions LKR)]:
-{monthly_revenue_md}
-
-[DISTRICT-WISE REVENUE PERFORMANCE (In Lakhs/100k LKR)]:
-{districtwise_data_md}
-
-[TOP 15 PRODUCTS BY REVENUE (In Millions LKR)]:
-{top_products_by_revenue_md}
-
-[TOP 15 PRODUCTS BY SOLD QUANTITY (Units)]:
-{top_products_by_quantity_md}
-
-[BOTTOM 10 PRODUCTS BY REVENUE (In Millions LKR)]:
-{bottom_products_by_revenue_md}
-
-[DAY-OF-WEEK REVENUE TREND (In Millions LKR)]:
-{weekly_sales_md}
-
-[HOURLY REVENUE TREND (In Millions LKR)]:
-{hourly_sales_md}
-
-[CUSTOMER SEGMENTATION OVERVIEW]:
-Total unique customers: {total_customers}
-Customers are grouped via RFM (Recency, Frequency, Monetary) analysis and K-Means clustering
-into behavioral segments. Segment name, customer count, and average spend per customer
-(in thousand LKR) are shown below:
-{segment_summary_md}
-
-[SALES FORECAST — NEXT YEAR, MONTHLY (In Millions LKR)]:
-A RandomForestRegressor trained on monthly revenue projects a {forecast_trend} trend for the
-next year ({forecast_year_label}) versus the previous year ({forecast_prev_year_label}) of
-actual revenue (recent actual average: {avg_recent_actual:.2f}M LKR/month vs. forecast average:
-{avg_forecast:.2f}M LKR/month, a {forecast_trend_pct:.1f}% difference). Projected peak month:
-{forecast_peak_period['Date'].strftime('%B %Y')} ({forecast_peak_period['Quarter_Label']}) at
-{forecast_peak_period['Sales']:.2f}M LKR. This forecast covers only the 12 months (1 year)
-immediately following the dataset's last recorded month — it does not extend further into the
-future. Monthly forecast values:
-{forecast_summary_md}
-
-Rules: Keep answers business-oriented, direct, and factual. Always clarify whether monetary
-values are displayed in Millions, Lakhs, or Thousands based on the data keys above. When asked
-about customers, loyalty, churn risk, or segments, use the CUSTOMER SEGMENTATION OVERVIEW table
-rather than guessing. When asked about timing, footfall, staffing, or "best time to shop/promote",
-use the DAY-OF-WEEK and HOURLY REVENUE TREND tables. When asked about products, bestsellers,
-top sellers, or worst/weakest performers, use the TOP/BOTTOM PRODUCTS BY REVENUE and TOP PRODUCTS
-BY SOLD QUANTITY tables rather than guessing. When asked about future sales, forecasts, projections,
-expected performance, or a specific upcoming quarter, use the SALES FORECAST table rather than
-guessing — if asked about a month or quarter beyond the 1-year forecast horizon, say the
-forecast doesn't extend that far rather than inventing
-a number.
-
-Answer format: Before answering a "best/worst/highest/lowest/top" question, scan the full
-relevant table yourself and identify the single row with the correct max or min value silently.
-State only that final answer as your opening sentence, with its exact figure. Keep answers to
-1-3 sentences unless the user asks for more detail or a breakdown."""
-
+    return f"""You are 'Insight.AI', the specialized chatbot for 'Retail Radar'.
+You have tools to fetch specific data matrices. Always call the appropriate tool when a user asks for data you don't have in context.
+Keep answers concise, direct, and factual.
+[DESCRIPTIVE STATISTICS]:\n{describe}\n[CORRELATION MATRIX]:\n{correlation}"""
 
 SYSTEM_PROMPT = build_system_prompt()
 
 
 
 def generate_reply(prompt: str) -> str:
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": prompt},
+    ]
     response = client.chat.completions.create(
         model=MODEL_NAME,
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": prompt},
-        ],
+        messages=messages,
+        tools=tools,
+        tool_choice="auto"
     )
-    return response.choices[0].message.content or "I could not generate a response."
+    msg = response.choices[0].message
+    if msg.tool_calls:
+        messages.append(msg)
+        for tool_call in msg.tool_calls:
+            func_name = tool_call.function.name
+            if func_name in available_tools:
+                func_response = available_tools[func_name]()
+                messages.append({
+                    "tool_call_id": tool_call.id,
+                    "role": "tool",
+                    "name": func_name,
+                    "content": func_response,
+                })
+        # Second call to get final answer
+        response = client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=messages
+        )
+        msg = response.choices[0].message
+    return msg.content or "I could not generate a response."
 
 def split_message(text: str, limit: int = 4000) -> list[str]:
     if len(text) <= limit:
@@ -215,11 +200,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 # --- Run bot in background thread ---
 def run_bot():
+    import asyncio
+    asyncio.set_event_loop(asyncio.new_event_loop())
     app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    app.run_polling()
+    app.run_polling(drop_pending_updates=True, stop_signals=())
 
 # --- Streamlit UI ---
 st.title("Retail Radar Telegram Bot")
