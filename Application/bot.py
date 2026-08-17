@@ -90,7 +90,7 @@ forecast_year_label = forecast_dataset['Year_Label'].iloc[0]
 
 # --- STREAMLIT CHAT UI ---
 if "model" not in st.session_state:
-    st.session_state['model'] = 'llama3-70b-8192'
+    st.session_state['model'] = 'openai/gpt-oss-20b'
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
