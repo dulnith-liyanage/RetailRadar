@@ -13,7 +13,7 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
-MODEL_NAME = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+MODEL_NAME = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b") # fix the model first
 
 GROQ_API_KEY = st.secrets['API_KEY']
 TELEGRAM_BOT_TOKEN = st.secrets['TELE_BOT_API']
