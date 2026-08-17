@@ -29,9 +29,136 @@ client = Groq(api_key=GROQ_API_KEY)
 # --- Your dataset preparation code here (unchanged) ---
 raw_df, _ = get_raw_data()
 df = clean_data(raw_df)
-# ... all your analysis and prompt building code remains the same ...
+
+dataset_string = df.head(5).to_string()
+
+describe = df.describe().to_markdown(index=True)
+correlation = df.corr(numeric_only=True).to_markdown(index=True)
+
+year_data = df.groupby("Year")["Total_Price_LKR"].sum().reset_index()
+year_data["Total_Price_LKR"] = year_data["Total_Price_LKR"] / 1000000
+year_data_md = year_data.to_markdown(index=False)
+
+monthly_revenue = df.groupby(["Year", "Month"])["Total_Price_LKR"].sum().reset_index()
+monthly_revenue["Total_Price_LKR"] = monthly_revenue["Total_Price_LKR"] / 1000000
+monthly_revenue["Year"] = monthly_revenue["Year"].astype(str)
+monthly_revenue_md = monthly_revenue.to_markdown(index=False)
+
+districtwise_data = df.groupby(["District"])["Total_Price_LKR"].sum().reset_index()
+districtwise_data["Total_Price_LKR"] = districtwise_data["Total_Price_LKR"] / 100000
+districtwise_data_md = districtwise_data.to_markdown(index=False)
+
+product_revenue = df.groupby("Description")["Total_Price_LKR"].sum().sort_values(ascending=False).reset_index()
+product_revenue["Total_Price_LKR"] = product_revenue["Total_Price_LKR"] / 1000000
+top_products_by_revenue_md = product_revenue.head(10).to_markdown(index=False)
+bottom_products_by_revenue_md = product_revenue.tail(5).sort_values("Total_Price_LKR").to_markdown(index=False)
+
+product_quantity = df.groupby("Description")["Quantity"].sum().sort_values(ascending=False).reset_index()
+top_products_by_quantity_md = product_quantity.head(10).to_markdown(index=False)
+
+day_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+weekly_sales = df.groupby("Day")["Total_Price_LKR"].sum().reset_index()
+weekly_sales["Total_Price_LKR"] = weekly_sales["Total_Price_LKR"] / 1000000
+weekly_sales["Day"] = pd.Categorical(weekly_sales["Day"], categories=day_order, ordered=True)
+weekly_sales = weekly_sales.sort_values("Day")
+weekly_sales_md = weekly_sales.to_markdown(index=False)
+
+hourly_sales = df.groupby("Hour")["Total_Price_LKR"].sum().reset_index()
+hourly_sales["Total_Price_LKR"] = hourly_sales["Total_Price_LKR"] / 1000000
+hourly_sales_md = hourly_sales.to_markdown(index=False)
+
+customers, _, segment_summary_md = get_segment_summary(df)
+total_customers = customers["CustomerID"].nunique()
+
+# --- Sales Forecast (shared with the Streamlit app's Forecast tab and bot.py) ---
+history_recent, forecast_dataset, forecast_combined, forecast_summary_md, forecast_peak_period, forecast_model = \
+    get_sales_forecast(df, is_uploaded=False)
+
+avg_recent_actual = history_recent["Sales"].mean()
+avg_forecast = forecast_dataset["Sales"].mean()
+forecast_trend = "upward" if avg_forecast > avg_recent_actual else "downward"
+forecast_trend_pct = abs((avg_forecast - avg_recent_actual) / avg_recent_actual) * 100 if avg_recent_actual else 0
+forecast_prev_year_label = history_recent["Year_Label"].iloc[0]
+forecast_year_label = forecast_dataset["Year_Label"].iloc[0]
+
+
+def build_system_prompt() -> str:
+    return f"""You are 'Insight.AI', the specialized chatbot for 'Retail Radar' analytical platform.
+Your job is to deliver concise data insights based on the matrices provided below.
+All revenue metrics are customized for Sri Lankan Rupees (LKR).
+
+[DATASET SAMPLE]:
+{dataset_string}
+
+[DESCRIPTIVE STATISTICS]:
+{describe}
+
+[CORRELATION MATRIX]:
+{correlation}
+
+[YEARLY REVENUE (In Millions LKR)]:
+{year_data_md}
+
+[MONTHLY REVENUE BREAKDOWN (In Millions LKR)]:
+{monthly_revenue_md}
+
+[DISTRICT-WISE REVENUE PERFORMANCE (In Lakhs/100k LKR)]:
+{districtwise_data_md}
+
+[TOP 15 PRODUCTS BY REVENUE (In Millions LKR)]:
+{top_products_by_revenue_md}
+
+[TOP 15 PRODUCTS BY SOLD QUANTITY (Units)]:
+{top_products_by_quantity_md}
+
+[BOTTOM 10 PRODUCTS BY REVENUE (In Millions LKR)]:
+{bottom_products_by_revenue_md}
+
+[DAY-OF-WEEK REVENUE TREND (In Millions LKR)]:
+{weekly_sales_md}
+
+[HOURLY REVENUE TREND (In Millions LKR)]:
+{hourly_sales_md}
+
+[CUSTOMER SEGMENTATION OVERVIEW]:
+Total unique customers: {total_customers}
+Customers are grouped via RFM (Recency, Frequency, Monetary) analysis and K-Means clustering
+into behavioral segments. Segment name, customer count, and average spend per customer
+(in thousand LKR) are shown below:
+{segment_summary_md}
+
+[SALES FORECAST — NEXT YEAR, MONTHLY (In Millions LKR)]:
+A RandomForestRegressor trained on monthly revenue projects a {forecast_trend} trend for the
+next year ({forecast_year_label}) versus the previous year ({forecast_prev_year_label}) of
+actual revenue (recent actual average: {avg_recent_actual:.2f}M LKR/month vs. forecast average:
+{avg_forecast:.2f}M LKR/month, a {forecast_trend_pct:.1f}% difference). Projected peak month:
+{forecast_peak_period['Date'].strftime('%B %Y')} ({forecast_peak_period['Quarter_Label']}) at
+{forecast_peak_period['Sales']:.2f}M LKR. This forecast covers only the 12 months (1 year)
+immediately following the dataset's last recorded month — it does not extend further into the
+future. Monthly forecast values:
+{forecast_summary_md}
+
+Rules: Keep answers business-oriented, direct, and factual. Always clarify whether monetary
+values are displayed in Millions, Lakhs, or Thousands based on the data keys above. When asked
+about customers, loyalty, churn risk, or segments, use the CUSTOMER SEGMENTATION OVERVIEW table
+rather than guessing. When asked about timing, footfall, staffing, or "best time to shop/promote",
+use the DAY-OF-WEEK and HOURLY REVENUE TREND tables. When asked about products, bestsellers,
+top sellers, or worst/weakest performers, use the TOP/BOTTOM PRODUCTS BY REVENUE and TOP PRODUCTS
+BY SOLD QUANTITY tables rather than guessing. When asked about future sales, forecasts, projections,
+expected performance, or a specific upcoming quarter, use the SALES FORECAST table rather than
+guessing — if asked about a month or quarter beyond the 1-year forecast horizon, say the
+forecast doesn't extend that far rather than inventing
+a number.
+
+Answer format: Before answering a "best/worst/highest/lowest/top" question, scan the full
+relevant table yourself and identify the single row with the correct max or min value silently.
+State only that final answer as your opening sentence, with its exact figure. Keep answers to
+1-3 sentences unless the user asks for more detail or a breakdown."""
+
 
 SYSTEM_PROMPT = build_system_prompt()
+
+
 
 def generate_reply(prompt: str) -> str:
     response = client.chat.completions.create(
