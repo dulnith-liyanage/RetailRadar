@@ -16,7 +16,7 @@ def get_raw_data():
 
 @st.cache_data
 def clean_data(df):
-    required_columns = ["CustomerID", "InvoiceNo", "InvoiceDate", "Description", "Quantity", "UnitPrice", "Total_Price_LKR", "District"]
+    required_columns = ["CustomerID", "InvoiceNo", "InvoiceDate", "Description", "Quantity", "UnitPrice_LKR", "Total_Price_LKR", "District"]
     missing_cols = [col for col in required_columns if col not in df.columns]
     if missing_cols:
         st.error(f"Uploaded dataset is missing required columns: {', '.join(missing_cols)}")
@@ -25,7 +25,7 @@ def clean_data(df):
     df = df.dropna(subset=["CustomerID"])
     df["CustomerID"] = df["CustomerID"].astype(int)
     df = df[df["Quantity"] > 0]
-    df = df[df["UnitPrice"] > 0]
+    df = df[df["UnitPrice_LKR"] > 0]
 
     df["InvoiceDate"] = pd.to_datetime(df["InvoiceDate"])
     df["Year"] = df["InvoiceDate"].dt.year

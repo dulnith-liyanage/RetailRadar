@@ -24,12 +24,15 @@ st.caption("Customers are grouped using RFM (Recency, Frequency, Monetary) analy
 
 df = clean_data(raw_df)
 
-st.sidebar.markdown("### Clustering Settings")
-num_clusters = st.sidebar.slider("Number of Segments (K)", min_value=2, max_value=12, value=6, step=1)
+col1, col2 = st.columns([3, 1])
+with col1:
+    num_clusters = st.slider("Number of Segments (K)", min_value=2, max_value=12, value=6, step=1)
 
 # RFM + K-Means Clustering 
 customers, cluster_counts, segment_summary_md, silhouette_score = get_segment_summary(df, n_clusters=num_clusters)
-st.sidebar.metric("Clustering Score (Silhouette)", f"{silhouette_score:.3f}")
+
+with col2:
+    st.metric("Clustering Score (Silhouette)", f"{silhouette_score:.3f}")
 
 
 # Segment icon helper

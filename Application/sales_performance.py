@@ -407,7 +407,7 @@ with tab3:
             color=alt.Color(
                 'Total_Price_LKR:Q',
                 title='Revenue (M LKR)',
-                scale=alt.Scale(range=['#3B4252', COLOR_ACCENT, '#F4DBD6']),
+                scale=alt.Scale(range=['#F4DBD6', COLOR_ACCENT, '#3B4252']),
             ),
             tooltip=[alt.Tooltip('Day:N', title='Day'),
                      alt.Tooltip('Hour:O', title='Hour'),
