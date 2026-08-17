@@ -5,6 +5,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import silhouette_score
 
 
 def get_raw_data():
@@ -15,6 +16,12 @@ def get_raw_data():
 
 @st.cache_data
 def clean_data(df):
+    required_columns = ["CustomerID", "InvoiceNo", "InvoiceDate", "Description", "Quantity", "UnitPrice", "Total_Price_LKR", "District"]
+    missing_cols = [col for col in required_columns if col not in df.columns]
+    if missing_cols:
+        st.error(f"Uploaded dataset is missing required columns: {', '.join(missing_cols)}")
+        st.stop()
+
     df = df.dropna(subset=["CustomerID"])
     df["CustomerID"] = df["CustomerID"].astype(int)
     df = df[df["Quantity"] > 0]
@@ -204,12 +211,13 @@ def _tier(value, bins, labels):
 
 
 @st.cache_data
-def get_segment_summary(df):
+def get_segment_summary(df, n_clusters=6):
     """
     Runs RFM + K-Means clustering (same logic as rfm.py) and returns:
       - customers: per-customer dataframe with Cluster, Label, Type, Total_Price_LKR
       - cluster_counts: per-segment dataframe with Type, Label, Count, Avg_Spend_LKR
       - summary_md: a markdown table of cluster_counts, ready to drop into an LLM prompt
+      - silhouette_avg: The silhouette score for the clustering
     """
     snapshot_date = df["InvoiceDate"].max() + pd.Timedelta(days=1)
 
@@ -222,8 +230,14 @@ def get_segment_summary(df):
     scaler = StandardScaler()
     rfm_scaled = scaler.fit_transform(rfm[["Recency", "Frequency", "Monetary"]])
 
-    kmeans = KMeans(n_clusters=6, random_state=42, n_init=10)
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
     rfm["Cluster"] = kmeans.fit_predict(rfm_scaled)
+
+    if len(rfm_scaled) > 10000:
+        sample_indices = np.random.choice(len(rfm_scaled), 10000, replace=False)
+        silhouette_avg = silhouette_score(rfm_scaled[sample_indices], rfm["Cluster"].iloc[sample_indices])
+    else:
+        silhouette_avg = silhouette_score(rfm_scaled, rfm["Cluster"])
 
     profile = rfm.groupby('Cluster')[['Recency', 'Frequency', 'Monetary']].mean().reset_index()
 
@@ -270,7 +284,7 @@ def get_segment_summary(df):
 
     summary_md = display_table.to_markdown(index=False)
 
-    return customers, cluster_counts, summary_md
+    return customers, cluster_counts, summary_md, silhouette_avg
 
 
 @st.cache_data
@@ -314,9 +328,19 @@ def get_sales_forecast(df, is_uploaded):
     monthly_sales["year"] = monthly_sales["Date"].dt.year
     monthly_sales["month"] = monthly_sales["Date"].dt.month
     monthly_sales["quarter"] = monthly_sales["Date"].dt.quarter
+    monthly_sales["lag_12"] = monthly_sales["Total_Price_LKR"].shift(12)
 
-    X = monthly_sales[["year", "month", "quarter"]]
-    y = monthly_sales["Total_Price_LKR"]
+    train_data = monthly_sales.dropna(subset=["lag_12"])
+    
+    if len(train_data) < 12:
+        # Fallback if less than 24 months of total data
+        X = monthly_sales[["year", "month", "quarter"]]
+        y = monthly_sales["Total_Price_LKR"]
+        use_lag = False
+    else:
+        X = train_data[["year", "month", "quarter", "lag_12"]]
+        y = train_data["Total_Price_LKR"]
+        use_lag = True
 
     # Forecast the next 12 months (next year) starting the month after the last one in the data
     last_month = monthly_sales["Date"].iloc[-1]
@@ -327,6 +351,9 @@ def get_sales_forecast(df, is_uploaded):
         "month": future_months.month,
         "quarter": future_months.quarter,
     })
+    
+    if use_lag:
+        X_forecast["lag_12"] = monthly_sales["Total_Price_LKR"].tail(12).values
 
     safe_cv = max(2, min(5, len(monthly_sales)))
 

@@ -74,7 +74,7 @@ hourly_sales['Total_Price_LKR'] = hourly_sales['Total_Price_LKR'] / 1000000
 hourly_sales_md = hourly_sales.to_markdown(index=False)
 
 # --- Customer Segmentation (RFM + K-Means) ---
-customers, cluster_counts, segment_summary_md = get_segment_summary(df)
+customers, cluster_counts, segment_summary_md, _ = get_segment_summary(df)
 total_customers = customers['CustomerID'].nunique()
 
 # --- NEW: Annual Sales Forecast (shared with the Forecast tab on Sales Performance) ---
@@ -112,80 +112,42 @@ if prompt := st.chat_input("What is up?"):
     # Generate assistant response ONLY when a new prompt is submitted
     with st.chat_message("assistant"):
 
+        def get_revenue_data():
+            return f"[YEARLY REVENUE]\n{year_data_md}\n[MONTHLY REVENUE]\n{monthly_revenue_md}\n[DISTRICT REVENUE]\n{districtwise_data_md}"
+
+        def get_product_data():
+            return f"[TOP PRODUCTS BY REVENUE]\n{top_products_by_revenue_md}\n[TOP PRODUCTS BY QUANTITY]\n{top_products_by_quantity_md}\n[BOTTOM PRODUCTS]\n{bottom_products_by_revenue_md}"
+
+        def get_segment_data():
+            return f"[CUSTOMER SEGMENTS]\n{segment_summary_md}"
+
+        def get_forecast_data():
+            return f"[SALES FORECAST]\n{forecast_summary_md}"
+
+        def get_timing_data():
+            return f"[WEEKLY SALES]\n{weekly_sales_md}\n[HOURLY SALES]\n{hourly_sales_md}"
+
+        available_tools = {
+            "get_revenue_data": get_revenue_data,
+            "get_product_data": get_product_data,
+            "get_segment_data": get_segment_data,
+            "get_forecast_data": get_forecast_data,
+            "get_timing_data": get_timing_data,
+        }
+
+        tools = [
+            {"type": "function", "function": {"name": "get_revenue_data", "description": "Get yearly, monthly, and district revenue."}},
+            {"type": "function", "function": {"name": "get_product_data", "description": "Get top and bottom performing products."}},
+            {"type": "function", "function": {"name": "get_segment_data", "description": "Get customer segments, RFM, and K-Means data."}},
+            {"type": "function", "function": {"name": "get_forecast_data", "description": "Get the next 12 months sales forecast."}},
+            {"type": "function", "function": {"name": "get_timing_data", "description": "Get revenue trends by day of week and hour of day."}}
+        ]
+
         # --- STRUCTURING THE SYSTEM CONTEXT ---
-        system_prompt = f"""You are 'Insight.AI', the specialized chatbot for 'Retail Radar' analytical platform.
-        Your job is to deliver concise data insights based on the matrices provided below.
-        All revenue metrics are customized for Sri Lankan Rupees (LKR).
-
-        [DESCRIPTIVE STATISTICS]:
-        {describe}
-
-        [CORRELATION MATRIX]:
-        {correlation}
-
-        [YEARLY REVENUE (In Millions LKR)]:
-        {year_data_md}
-
-        [MONTHLY REVENUE BREAKDOWN (In Millions LKR)]:
-        {monthly_revenue_md}
-
-        [DISTRICT-WISE REVENUE PERFORMANCE (In Lakhs/100k LKR)]:
-        {districtwise_data_md}
-
-        [TOP 15 PRODUCTS BY REVENUE (In Millions LKR)]:
-        {top_products_by_revenue_md}
-
-        [TOP 15 PRODUCTS BY SOLD QUANTITY (Units)]:
-        {top_products_by_quantity_md}
-
-        [BOTTOM 10 PRODUCTS BY REVENUE (In Millions LKR)]:
-        {bottom_products_by_revenue_md}
-
-        [DAY-OF-WEEK REVENUE TREND (In Millions LKR)]:
-        {weekly_sales_md}
-
-        [HOURLY REVENUE TREND (In Millions LKR)]:
-        {hourly_sales_md}
-
-        [CUSTOMER SEGMENTATION OVERVIEW]:
-        Total unique customers: {total_customers}
-        Customers are grouped via RFM (Recency, Frequency, Monetary) analysis and K-Means clustering
-        into behavioral segments. Segment name, customer count, and average spend per customer
-        (in thousand LKR) are shown below:
-        {segment_summary_md}
-
-        [SALES FORECAST — NEXT YEAR, MONTHLY (In Millions LKR)]:
-        A RandomForestRegressor trained on monthly revenue projects a {forecast_trend} trend for the
-        next year ({forecast_year_label}) versus the previous year ({forecast_prev_year_label}) of
-        actual revenue (recent actual average: {avg_recent_actual:.2f}M LKR/month vs. forecast
-        average: {avg_forecast:.2f}M LKR/month, a {forecast_trend_pct:.1f}% difference). Projected
-        peak month: {forecast_peak_period['Date'].strftime('%B %Y')} ({forecast_peak_period['Quarter_Label']}) at
-        {forecast_peak_period['Sales']:.2f}M LKR. This forecast covers only the 12 months (1 year)
-        immediately following the dataset's last recorded month — it does not extend further into the
-        future. Monthly forecast values:
-        {forecast_summary_md}
-
-        Rules: Keep answers business-oriented, direct, and factual. Always clarify whether monetary
-        values are displayed in Millions, Lakhs, or Thousands based on the data keys above. When asked
-        about customers, loyalty, churn risk, or segments, use the CUSTOMER SEGMENTATION OVERVIEW table
-        rather than guessing — if a segment isn't in the table, say so instead of inventing one. When
-        asked about timing, footfall, staffing, or "best time to shop/promote", use the DAY-OF-WEEK and
-        HOURLY REVENUE TREND tables rather than guessing. When asked about products, bestsellers, top
-        sellers, or worst/weakest performers, use the TOP/BOTTOM PRODUCTS BY REVENUE and TOP PRODUCTS BY
-        SOLD QUANTITY tables rather than guessing — if a product isn't in these tables, say you only
-        have visibility into the top and bottom performers, not the full catalog. When asked about future
-        sales, forecasts, projections, expected performance, or a specific upcoming quarter, use the
-        SALES FORECAST table rather than guessing — if asked about a month or quarter beyond the 1-year
-        forecast horizon, say the forecast doesn't extend that far rather than inventing a number.
-
-        Answer format: Before answering a "best/worst/highest/lowest/top" question, scan the full
-        relevant table yourself and identify the single row with the correct max or min value — do
-        this silently, do not narrate the scanning process. State ONLY that final answer as your
-        opening sentence, with its exact figure (e.g. "The best performing hour is 18:00, with 22.0
-        million LKR in revenue."). Never present one answer and then correct yourself to a different
-        one in the same response — if you catch a discrepancy, resolve it before writing, not after.
-        Do not list runner-up or nearby values unless the user explicitly asks for a ranking or
-        comparison. Keep answers to 1-3 sentences unless the user asks for more detail or a breakdown."""
+        system_prompt = f"""You are 'Insight.AI', the specialized chatbot for 'Retail Radar'.
+You have tools to fetch specific data matrices. Always call the appropriate tool when a user asks for data you don't have in context.
+Keep answers concise, direct, and factual.
+[DESCRIPTIVE STATISTICS]:\n{describe}\n[CORRELATION MATRIX]:\n{correlation}"""
 
         api_messages = [{"role": "system", "content": system_prompt}]
         
@@ -195,21 +157,42 @@ if prompt := st.chat_input("What is up?"):
             for m in st.session_state.messages
         ])
 
-        # Pass the clean list to the API
-        stream = client.chat.completions.create(
+        # Pass the clean list to the API (non-streaming to check tools)
+        response_msg = client.chat.completions.create(
             model=st.session_state['model'],
             messages=api_messages,
-            stream=True,
-        )
+            tools=tools,
+            tool_choice="auto"
+        ).choices[0].message
         
-        # Parse text chunks out of the Groq stream objects for st.write_stream
-        def text_generator():
-            for chunk in stream:
-                content = chunk.choices[0].delta.content
-                if content:
-                    yield content
-
-        response = st.write_stream(text_generator())
+        if response_msg.tool_calls:
+            api_messages.append(response_msg)
+            for tool_call in response_msg.tool_calls:
+                func_name = tool_call.function.name
+                if func_name in available_tools:
+                    func_response = available_tools[func_name]()
+                    api_messages.append({
+                        "tool_call_id": tool_call.id,
+                        "role": "tool",
+                        "name": func_name,
+                        "content": func_response,
+                    })
+            
+            # Second call (streaming)
+            stream = client.chat.completions.create(
+                model=st.session_state['model'],
+                messages=api_messages,
+                stream=True
+            )
+            def text_generator():
+                for chunk in stream:
+                    content = chunk.choices[0].delta.content
+                    if content:
+                        yield content
+            response = st.write_stream(text_generator())
+        else:
+            response = response_msg.content or ""
+            st.write(response)
         
     # Append to history AFTER streaming finishes
     st.session_state.messages.append({"role": "assistant", "content": response})
