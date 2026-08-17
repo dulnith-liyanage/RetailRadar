@@ -90,7 +90,7 @@ forecast_year_label = forecast_dataset['Year_Label'].iloc[0]
 
 # --- STREAMLIT CHAT UI ---
 if "model" not in st.session_state:
-    st.session_state["model"] = "llama-3.3-70b-versatile"
+    st.session_state['model'] = 'llama-3.1-70b-versatile'
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
