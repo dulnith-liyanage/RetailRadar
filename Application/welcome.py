@@ -44,10 +44,11 @@ uploaded_file = st.file_uploader("Choose a file (.csv)", accept_multiple_files=F
 
 if uploaded_file:
     dataframe = pd.read_csv(uploaded_file)
+    conn = sqlite3.connect("../database.db")
     if option == "Replace existing data":
+        dataframe.to_sql('sales_table', conn, if_exists='replace', index=False)
         st.session_state["dataset"] = dataframe
     elif option == "Append new data into the existing data":
-        conn = sqlite3.connect("../database.db")
         dataframe.to_sql('sales_table', conn, if_exists='append', index=False)
         df = pd.read_sql('SELECT * FROM sales_table', conn)
         # 3. Close connection
@@ -162,3 +163,5 @@ with st.container(border=True):
             st.image(contributor["img"], width=60)
         with col2:
             st.markdown(f"**[{contributor['name']}]({contributor['lin']})**  \n*{contributor['role']}*")
+
+st.dataframe(st.session_state['dataset'].tail(20))
