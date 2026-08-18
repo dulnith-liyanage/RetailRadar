@@ -35,12 +35,13 @@ st.markdown(
     "it's already running on our built-in demo dataset covering Sri Lankan retail "
     "transactions from 2020 to 2026."
 )
+
+uploaded_file = st.file_uploader("Choose a file (.csv)", accept_multiple_files=False, type=".csv")
+
 option = st.selectbox(
 "How do you like to upload the dataset?",
 ("Replace existing data", "Append new data into the existing data")
 )
-
-uploaded_file = st.file_uploader("Choose a file (.csv)", accept_multiple_files=False, type=".csv")
 
 if uploaded_file:
     dataframe = pd.read_csv(uploaded_file)
@@ -56,9 +57,12 @@ if uploaded_file:
         st.session_state["dataset"] = df
     st.success("Dataset successfully uploaded and saved to memory!")
 
+
 # Data Preview & Overview
 raw_df, is_uploaded = get_raw_data()
 df = clean_data(raw_df)
+
+st.dataframe(df.tail(20))
 
 st.markdown("### Data Overview")
 
@@ -163,5 +167,3 @@ with st.container(border=True):
             st.image(contributor["img"], width=60)
         with col2:
             st.markdown(f"**[{contributor['name']}]({contributor['lin']})**  \n*{contributor['role']}*")
-
-st.dataframe(st.session_state['dataset'].tail(20))
