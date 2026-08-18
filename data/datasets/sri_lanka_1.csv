@@ -1,4 +1,4 @@
-InvoiceNo,StockCode,Description,Quantity,InvoiceDate,CustomerID,UnitPrice,Total_Price_LKR,District
+InvoiceNo,StockCode,Description,Quantity,InvoiceDate,CustomerID,UnitPrice_LKR,Total_Price_LKR,District
 540001,40002,DILMAH EARL GREY TEA 50 BAGS,6,1/1/20 16:22,,850,5100,Kegalle
 540002,40049,ROZA PASTA MACARONI 400G,1,1/2/20 8:26,401113,300,300,Batticaloa
 540003,40022,ANCHOR MILK POWDER 400G,4,1/2/20 19:26,401149,1150,4600,Gampaha

@@ -1,4 +1,4 @@
-InvoiceNo,StockCode,Description,Quantity,InvoiceDate,CustomerID,UnitPrice,Total_Price_LKR,District
+InvoiceNo,StockCode,Description,Quantity,InvoiceDate,CustomerID,UnitPrice_LKR,Total_Price_LKR,District
 530001,40003,DILMAH GREEN TEA 20 BAGS,5,1/8/20 12:28,301039,550,2750,Kegalle
 530002,40034,HARISCHANDRA COFFEE 100G,2,1/9/20 18:15,301045,380,760,Polonnaruwa
 530003,40042,MARINA COCONUT OIL 1L,4,1/10/20 17:32,301178,950,3800,Badulla

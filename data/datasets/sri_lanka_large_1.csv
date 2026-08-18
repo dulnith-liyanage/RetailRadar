@@ -1,4 +1,4 @@
-InvoiceNo,StockCode,Description,Quantity,InvoiceDate,CustomerID,UnitPrice,Total_Price_LKR,District
+InvoiceNo,StockCode,Description,Quantity,InvoiceDate,CustomerID,UnitPrice_LKR,Total_Price_LKR,District
 500362,40013,SPA CEYLON SLEEP BODY LOTION,3,1/25/20 16:02,,4460.41,13381.23,Ampara
 500362,40102,DIAMOND COOKING OIL 1L,8,1/25/20 16:02,,772.47,6179.76,Ampara
 500194,40014,SPA CEYLON HAND CREAM,12,2/1/20 16:29,14616,2393.83,28725.96,Kandy
