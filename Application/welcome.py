@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from utils import get_raw_data, clean_data
-
+import sqlite3
 st.set_page_config(page_title="Welcome")
 
 NORD_BG = "#2E3440"          
@@ -35,13 +35,24 @@ st.markdown(
     "it's already running on our built-in demo dataset covering Sri Lankan retail "
     "transactions from 2020 to 2026."
 )
+option = st.selectbox(
+"How do you like to upload the dataset?",
+("Replace existing data", "Append new data into the existing data")
+)
 
 uploaded_file = st.file_uploader("Choose a file (.csv)", accept_multiple_files=False, type=".csv")
 
 if uploaded_file:
     dataframe = pd.read_csv(uploaded_file)
-    st.session_state["dataset"] = dataframe
-
+    if option == "Replace existing data":
+        st.session_state["dataset"] = dataframe
+    elif option == "Append new data into the existing data":
+        conn = sqlite3.connect("../database.db")
+        dataframe.to_sql('sales_table', conn, if_exists='append', index=False)
+        df = pd.read_sql('SELECT * FROM sales_table', conn)
+        # 3. Close connection
+        conn.close()
+        st.session_state["dataset"] = df
     st.success("Dataset successfully uploaded and saved to memory!")
 
 # Data Preview & Overview

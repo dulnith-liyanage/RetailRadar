@@ -6,13 +6,22 @@ from sklearn.cluster import KMeans
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import silhouette_score
+import sqlite3
 
+# def get_raw_data():
+#     if "dataset" in st.session_state:
+#         return st.session_state["dataset"], True
+#     return pd.read_csv("https://raw.githubusercontent.com/dulnith-liyanage/RetailRadar/refs/heads/main/data/datasets/sri_lanka_1.csv"), False
 
 def get_raw_data():
+    conn = sqlite3.connect('../database.db')
     if "dataset" in st.session_state:
-        return st.session_state["dataset"], True
-    return pd.read_csv("https://raw.githubusercontent.com/dulnith-liyanage/RetailRadar/refs/heads/main/data/datasets/sri_lanka_1.csv"), False
 
+        return st.session_state["dataset"], True
+    df = pd.read_sql('SELECT * FROM sales_table', conn)
+    return df, False
+
+    
 
 @st.cache_data
 def clean_data(df):
