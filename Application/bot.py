@@ -182,7 +182,8 @@ Keep answers concise, direct, and factual.
             stream = client.chat.completions.create(
                 model=st.session_state['model'],
                 messages=api_messages,
-                stream=True
+                stream=True,
+                tools=tools,
             )
             def text_generator():
                 for chunk in stream:
